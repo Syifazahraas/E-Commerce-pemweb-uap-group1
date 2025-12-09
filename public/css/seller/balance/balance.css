@@ -1,0 +1,103 @@
+    /* Date Info */
+    .date-info strong {
+        color: #1e3a8a;
+        font-size: 14px;
+    }
+
+    .date-info small {
+        font-size: 12px;
+        margin-top: 2px;
+    }
+
+    /* Badge Variants */
+    .badge-success {
+        background-color: #d1fae5;
+        color: #065f46;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 12px;
+    }
+
+    .badge-warning {
+        background-color: #fef3c7;
+        color: #78350f;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 12px;
+    }
+
+    /* Reference Info */
+    .reference-info code {
+        background-color: #f1f5f9;
+        padding: 4px 8px;
+        border-radius: 4px;
+        color: #475569;
+        font-family: 'Courier New', monospace;
+    }
+
+    /* Remarks Text */
+    .remarks-text {
+        color: #334155;
+        font-size: 14px;
+    }
+
+    /* Amount Badge */
+    .amount-badge {
+        font-weight: 700;
+        font-size: 15px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        display: inline-block;
+    }
+
+    .amount-income {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+
+    .amount-withdraw {
+        background-color: #fef3c7;
+        color: #78350f;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 50px 20px;
+    }
+
+    .empty-state i {
+        font-size: 50px;
+        color: #cbd5e1;
+    }
+
+    .empty-state h5 {
+        color: #1e3a8a;
+        font-weight: 600;
+        margin: 15px 0 8px 0;
+    }
+
+    .empty-state p {
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .table-responsive {
+            font-size: 13px;
+        }
+
+        .amount-badge {
+            font-size: 13px;
+            padding: 6px 10px;
+        }
+
+        .date-info strong {
+            font-size: 13px;
+        }
+    }
+

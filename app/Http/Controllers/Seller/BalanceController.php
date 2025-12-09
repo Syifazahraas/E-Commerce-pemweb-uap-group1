@@ -11,15 +11,42 @@ class BalanceController extends Controller
 {
     public function index()
     {
+        // ambil store milik user
         $store = Auth::user()->store;
-        $balance = StoreBalance::firstOrCreate(
+
+        // kalau user belum punya store
+        if (!$store) {
+            return redirect()->back()
+                ->with('error', 'Anda belum memiliki toko. Silakan buat toko terlebih dahulu.');
+        }
+
+        // ambil atau buat balance
+        $storeBalance = StoreBalance::firstOrCreate(
             ['store_id' => $store->id],
             ['balance' => 0]
         );
 
-        // Kalau ada tabel history, bisa fetch history juga
-        $history = $balance->history()->orderBy('created_at', 'desc')->get(); // asumsikan relasi history
+        // ambil history saldo
+        $histories = $storeBalance->storeBalanceHistories()
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
 
-        return view('seller.balance.index', compact('balance', 'history'));
+        // hitung income
+        $totalIncome = $storeBalance->storeBalanceHistories()
+            ->where('type', 'income')
+            ->sum('amount');
+
+        // hitung withdraw
+        $totalWithdraw = $storeBalance->storeBalanceHistories()
+            ->where('type', 'withdraw')
+            ->sum('amount');
+
+        return view('seller.balance.index', compact(
+            'store',
+            'storeBalance',
+            'histories',
+            'totalIncome',
+            'totalWithdraw'
+        ));
     }
 }

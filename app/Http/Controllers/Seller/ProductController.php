@@ -10,138 +10,293 @@ use App\Models\ProductCategory;
 use App\Models\ProductImage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    // List produk milik seller
+    /**
+     * Display a listing of products
+     */
     public function index()
     {
-        $store = Auth::user()->store;
-        $products = Product::where('store_id', $store->id)->paginate(15);
-        return view('seller.products.index', compact('products'));
+        try {
+            $store = Auth::user()->store;
+
+            if (!$store) {
+                return redirect()->route('seller.store.create')
+                                 ->with('warning', 'Silakan buat toko terlebih dahulu.');
+            }
+
+            $products = Product::where('store_id', $store->id)
+                              ->with('productCategory', 'productImages')
+                              ->latest()
+                              ->paginate(15);
+
+            return view('seller.products.index', compact('products'));
+        } catch (\Exception $e) {
+            Log::error('Error Products Index: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat memuat produk.');
+        }
     }
 
-    // Form create produk baru
+    /**
+     * Show the form for creating a new product
+     */
     public function create()
     {
-        $categories = ProductCategory::all();
-        return view('seller.products.create', compact('categories'));
+        try {
+            $store = Auth::user()->store;
+
+            if (!$store) {
+                return redirect()->route('seller.store.create')
+                                 ->with('warning', 'Silakan buat toko terlebih dahulu.');
+            }
+
+            $categories = ProductCategory::whereNull('parent_id')->with('children')->get();
+            return view('seller.products.create', compact('categories'));
+        } catch (\Exception $e) {
+            Log::error('Error Load Create Product: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat membuka form.');
+        }
     }
 
-    // Simpan produk baru
+    /**
+     * Store a newly created product in storage
+     * Note: Image upload handled by ProductImageController
+     */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'product_category_id' => 'required|exists:productcategory,id',
+            'product_category_id' => 'required|exists:product_categories,id',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'weight' => 'nullable|numeric|min:0',
-            'condition' => 'required|string',
-            'description' => 'nullable|string',
-            // additional fields seperti size_available, color, material dll bisa ditambahkan
+            'condition' => 'required|in:new,second',
+            'description' => 'nullable|string|max:5000',
+        ], [
+            'name.required' => 'Nama produk wajib diisi.',
+            'name.max' => 'Nama produk maksimal 255 karakter.',
+            'product_category_id.required' => 'Kategori wajib dipilih.',
+            'product_category_id.exists' => 'Kategori tidak valid.',
+            'price.required' => 'Harga wajib diisi.',
+            'price.numeric' => 'Harga harus berupa angka.',
+            'price.min' => 'Harga tidak boleh kurang dari 0.',
+            'stock.required' => 'Stok wajib diisi.',
+            'stock.integer' => 'Stok harus berupa angka bulat.',
+            'condition.required' => 'Kondisi wajib dipilih.',
+            'condition.in' => 'Kondisi harus Baru atau Bekas.',
         ]);
 
-        $store = Auth::user()->store;
-
-        $product = new Product();
-        $product->store_id = $store->id;
-        $product->product_category_id = $request->product_category_id;
-        $product->name = $request->name;
-        $product->slug = Str::slug($request->name) . '-' . Str::random(6);
-        $product->price = $request->price;
-        $product->stock = $request->stock;
-        $product->weight = $request->weight;
-        $product->condition = $request->condition;
-        $product->description = $request->description;
-        $product->save();
-
-        // Jika ada gambar
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $file) {
-                $path = $file->store('products', 'public'); // asumsikan storage disk 'public'
-                ProductImage::create([
-                    'product_id' => $product->id,
-                    'image' => $path,
-                    'is_thumbnail' => false,
-                ]);
+        DB::beginTransaction();
+        try {
+            $user = Auth::user();
+            if (!$user || !$user->store) {
+                return redirect()->route('seller.store.create')
+                                 ->with('error', 'Silakan buat toko terlebih dahulu.');
             }
-        }
 
-        return redirect()->route('seller.products.index')
-                         ->with('success', 'Produk berhasil ditambahkan.');
+            $store = $user->store;
+
+            // Create product
+            $product = new Product();
+            $product->store_id = $store->id;
+            $product->product_category_id = $validated['product_category_id'];
+            $product->name = $validated['name'];
+            $product->slug = Str::slug($validated['name']) . '-' . Str::random(6);
+            $product->price = $validated['price'];
+            $product->stock = $validated['stock'];
+            $product->weight = $validated['weight'] ?? 0;
+            $product->condition = $validated['condition'];
+            $product->description = $validated['description'] ?? null;
+
+            if (!$product->save()) {
+                DB::rollBack();
+                return redirect()->back()
+                                 ->withInput()
+                                 ->with('error', 'Gagal menyimpan produk. Silakan coba lagi.');
+            }
+
+            Log::info('Product created: ' . $product->id);
+
+            DB::commit();
+
+            // Redirect ke halaman upload gambar atau langsung ke edit dengan session
+            return redirect()->route('seller.products.edit', $product->id)
+                             ->with('success', 'Produk berhasil ditambahkan. Silakan upload gambar produk.')
+                             ->with('new_product', true);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            Log::warning('Validation error: ' . json_encode($e->errors()));
+            return redirect()->back()
+                             ->withInput()
+                             ->withErrors($e->errors());
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error Store Product: ' . $e->getMessage() . ' | ' . $e->getFile() . ':' . $e->getLine());
+            return redirect()->back()
+                             ->withInput()
+                             ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
-    // Form edit produk
+    /**
+     * Display the specified product
+     */
+    public function show($id)
+    {
+        try {
+            $store = Auth::user()->store;
+
+            if (!$store) {
+                return redirect()->route('seller.store.create')
+                                 ->with('warning', 'Silakan buat toko terlebih dahulu.');
+            }
+
+            $product = Product::where('store_id', $store->id)
+                             ->with('productImages', 'productCategory')
+                             ->findOrFail($id);
+
+            return view('seller.products.show', compact('product'));
+        } catch (\Exception $e) {
+            Log::error('Error Show Product: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Produk tidak ditemukan.');
+        }
+    }
+
+    /**
+     * Show the form for editing the specified product
+     */
     public function edit($id)
     {
-        $store = Auth::user()->store;
-        $product = Product::where('store_id', $store->id)->findOrFail($id);
-        $categories = ProductCategory::all();
-        return view('seller.products.edit', compact('product','categories'));
+        try {
+            $store = Auth::user()->store;
+
+            if (!$store) {
+                return redirect()->route('seller.store.create')
+                                 ->with('warning', 'Silakan buat toko terlebih dahulu.');
+            }
+
+            $product = Product::where('store_id', $store->id)
+                             ->with('productImages', 'productCategory')
+                             ->findOrFail($id);
+
+            $categories = ProductCategory::whereNull('parent_id')->with('children')->get();
+
+            return view('seller.products.edit', compact('product', 'categories'));
+        } catch (\Exception $e) {
+            Log::error('Error Load Edit Product: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat membuka form edit.');
+        }
     }
 
-    // Update produk
+    /**
+     * Update the specified product in storage
+     * Note: Image upload handled by ProductImageController
+     */
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'product_category_id' => 'required|exists:productcategory,id',
+            'product_category_id' => 'required|exists:product_categories,id',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'weight' => 'nullable|numeric|min:0',
-            'condition' => 'required|string',
-            'description' => 'nullable|string',
+            'condition' => 'required|in:new,second',
+            'description' => 'nullable|string|max:5000',
+        ], [
+            'name.required' => 'Nama produk wajib diisi.',
+            'product_category_id.required' => 'Kategori wajib dipilih.',
+            'price.required' => 'Harga wajib diisi.',
+            'stock.required' => 'Stok wajib diisi.',
+            'condition.required' => 'Kondisi wajib dipilih.',
         ]);
 
-        $store = Auth::user()->store;
-        $product = Product::where('store_id', $store->id)->findOrFail($id);
-
-        $product->product_category_id = $request->product_category_id;
-        $product->name = $request->name;
-        $product->price = $request->price;
-        $product->stock = $request->stock;
-        $product->weight = $request->weight;
-        $product->condition = $request->condition;
-        $product->description = $request->description;
-        $product->save();
-
-        // handle gambar jika ada upload baru
-        if ($request->hasFile('images')) {
-            // Optional: hapus gambar lama dulu
-            foreach ($product->images as $img) {
-                // Storage::delete('public/' . $img->image);
-                $img->delete();
+        DB::beginTransaction();
+        try {
+            $user = Auth::user();
+            if (!$user || !$user->store) {
+                return redirect()->route('seller.store.create')
+                                 ->with('error', 'Silakan buat toko terlebih dahulu.');
             }
-            foreach ($request->file('images') as $file) {
-                $path = $file->store('products', 'public');
-                ProductImage::create([
-                    'product_id' => $product->id,
-                    'image' => $path,
-                    'is_thumbnail' => false,
-                ]);
+
+            $store = $user->store;
+            $product = Product::where('store_id', $store->id)->findOrFail($id);
+
+            // Update product data
+            $product->product_category_id = $validated['product_category_id'];
+            $product->name = $validated['name'];
+            $product->price = $validated['price'];
+            $product->stock = $validated['stock'];
+            $product->weight = $validated['weight'] ?? 0;
+            $product->condition = $validated['condition'];
+            $product->description = $validated['description'] ?? null;
+
+            if (!$product->save()) {
+                DB::rollBack();
+                return redirect()->back()
+                                 ->withInput()
+                                 ->with('error', 'Gagal memperbarui produk.');
             }
+
+            Log::info('Product updated: ' . $product->id);
+
+            DB::commit();
+            return redirect()->route('seller.products.edit', $product->id)
+                             ->with('success', 'Produk berhasil diperbarui.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error Update Product: ' . $e->getMessage());
+            return redirect()->back()
+                             ->withInput()
+                             ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-
-        return redirect()->route('seller.products.index')
-                         ->with('success', 'Produk berhasil diperbarui.');
     }
 
-    // Hapus produk
+    /**
+     * Remove the specified product from storage
+     */
     public function destroy($id)
     {
-        $store = Auth::user()->store;
-        $product = Product::where('store_id', $store->id)->findOrFail($id);
+        DB::beginTransaction();
+        try {
+            $user = Auth::user();
+            if (!$user || !$user->store) {
+                return redirect()->route('seller.store.create')
+                                 ->with('error', 'Silakan buat toko terlebih dahulu.');
+            }
 
-        // Optional: delete images files
-        foreach ($product->images as $img) {
-            // Storage::delete('public/' . $img->image);
-            $img->delete();
+            $store = $user->store;
+            $product = Product::where('store_id', $store->id)->findOrFail($id);
+
+            // Delete images from storage
+            foreach ($product->productImages as $img) {
+                try {
+                    if (Storage::disk('public')->exists($img->image)) {
+                        Storage::disk('public')->delete($img->image);
+                    }
+                    $img->delete();
+                } catch (\Exception $e) {
+                    Log::error('Error deleting image file: ' . $e->getMessage());
+                }
+            }
+
+            // Delete product
+            $product->delete();
+
+            Log::info('Product deleted: ' . $id);
+
+            DB::commit();
+            return redirect()->route('seller.products.index')
+                             ->with('success', 'Produk berhasil dihapus.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error Delete Product: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menghapus produk.');
         }
-
-        $product->delete();
-
-        return redirect()->route('seller.products.index')
-                         ->with('success', 'Produk berhasil dihapus.');
     }
 }

@@ -12,11 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('product_images', function (Blueprint $table) {
-            $table->id()->primary();
+            $table->id();
             $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
-            $table->string('image');
+            $table->string('image'); // path ke storage
             $table->boolean('is_thumbnail')->default(false);
             $table->timestamps();
+
+            // Index untuk performa query
+            $table->index('product_id');
+            $table->index(['product_id', 'is_thumbnail']);
         });
     }
 

@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProductCategory extends Model
 {
-
     protected $fillable = [
+        'store_id',
         'parent_id',
         'image',
         'name',
@@ -16,14 +16,20 @@ class ProductCategory extends Model
         'description',
     ];
 
+    public function store()
+    {
+        return $this->belongsTo(Store::class);
+    }
+
     public function parent()
     {
         return $this->belongsTo(ProductCategory::class, 'parent_id', 'id');
     }
+
     public function children()
     {
         return $this->hasMany(ProductCategory::class, 'parent_id', 'id');
-    } 
+    }
 
     public function products()
     {
