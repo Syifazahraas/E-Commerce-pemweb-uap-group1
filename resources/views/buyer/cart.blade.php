@@ -32,7 +32,25 @@
                                         <p class="font-medium text-slate-900">Rp {{ number_format($item['price'], 0, ',', '.') }}</p>
                                     </div>
                                     <p class="text-sm text-slate-500 mb-1">Size: <span class="text-slate-900 font-bold">{{ $item['size'] ?? '-' }}</span></p>
-                                    <p class="text-sm text-slate-500">Qty: {{ $item['qty'] }}</p>
+                                    
+                                    <!-- Quantity Controls -->
+                                    <div class="flex items-center gap-4 py-2">
+                                        <div class="flex items-center border border-gray-200 rounded">
+                                            <form action="{{ route('cart.update', $id) }}" method="POST">
+                                                @csrf @method('PATCH')
+                                                <input type="hidden" name="action" value="decrease">
+                                                <button type="submit" class="w-8 h-8 flex items-center justify-center text-slate-500 hover:bg-gray-100 transition-colors {{ $item['qty'] <= 1 ? 'opacity-50 cursor-not-allowed' : '' }}" {{ $item['qty'] <= 1 ? 'disabled' : '' }}>-</button>
+                                            </form>
+                                            
+                                            <span class="w-10 text-center text-sm font-bold">{{ $item['qty'] }}</span>
+                                            
+                                            <form action="{{ route('cart.update', $id) }}" method="POST">
+                                                @csrf @method('PATCH')
+                                                <input type="hidden" name="action" value="increase">
+                                                <button type="submit" class="w-8 h-8 flex items-center justify-center text-slate-500 hover:bg-gray-100 transition-colors">+</button>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
                                 
                                 <form action="{{ route('cart.remove', $id) }}" method="POST">

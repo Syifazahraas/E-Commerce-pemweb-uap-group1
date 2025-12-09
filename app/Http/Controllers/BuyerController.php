@@ -143,6 +143,33 @@ class BuyerController extends Controller
         return redirect()->route('cart')->with('success', 'Product added to cart!');
     }
 
+    public function updateCart(Request $request, $id)
+    {
+        $cart = session()->get('cart', []);
+
+        if (isset($cart[$id])) {
+            if ($request->action == 'increase') {
+                // Check stock
+                $product = Product::find($cart[$id]['id']);
+                if ($product && $cart[$id]['qty'] < $product->stock) {
+                    $cart[$id]['qty']++;
+                    $cart[$id]['subtotal'] = $cart[$id]['qty'] * $cart[$id]['price'];
+                } else {
+                    return back()->with('error', 'Cannot add more. Out of stock!');
+                }
+            } elseif ($request->action == 'decrease') {
+                if ($cart[$id]['qty'] > 1) {
+                    $cart[$id]['qty']--;
+                    $cart[$id]['subtotal'] = $cart[$id]['qty'] * $cart[$id]['price'];
+                }
+            }
+            
+            session()->put('cart', $cart);
+        }
+
+        return redirect()->route('cart')->with('success', 'Cart updated');
+    }
+
     public function removeFromCart($id)
     {
         $cart = session()->get('cart', []);

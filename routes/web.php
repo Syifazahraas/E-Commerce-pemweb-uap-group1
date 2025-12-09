@@ -15,6 +15,7 @@ Route::get('/', [BuyerController::class, 'home'])->name('home');
 Route::get('/product/{id}', [BuyerController::class, 'productDetail'])->name('product.show');
 Route::get('/cart', [BuyerController::class, 'cart'])->name('cart');
 Route::post('/cart/add', [BuyerController::class, 'addToCart'])->name('cart.add');
+Route::patch('/cart/{id}', [BuyerController::class, 'updateCart'])->name('cart.update');
 Route::delete('/cart/{id}', [BuyerController::class, 'removeFromCart'])->name('cart.remove');
 
 // Live Search API
