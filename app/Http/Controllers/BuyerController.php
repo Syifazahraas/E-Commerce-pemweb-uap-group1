@@ -57,6 +57,17 @@ class BuyerController extends Controller
         return view('buyer.sale', compact('saleProducts'));
     }
 
+    public function products(Request $request)
+    {
+        $query = Product::with(['category', 'images'])->where('stock', '>', 0);
+
+        // Simple sort filters could be added here later
+        
+        $products = $query->orderBy('created_at', 'desc')->paginate(20);
+
+        return view('buyer.products', compact('products'));
+    }
+
     public function productDetail($id)
     {
         $product = Product::with(['category', 'images', 'reviews'])->findOrFail($id);

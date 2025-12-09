@@ -54,7 +54,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 mb-8">
                 @foreach($saleProducts as $product)
                 <div class="group">
-                    <div class="bg-gradient-to-br from-[#1a2332] to-[#0f172a] rounded-2xl md:rounded-3xl p-4 border-2 border-[#334155] hover:border-[#93C5FD] transition-all duration-300 hover:shadow-xl hover:shadow-[#93C5FD]/20">
+                    <a href="{{ route('product.show', $product->id) }}" class="block h-full bg-gradient-to-br from-[#1a2332] to-[#0f172a] rounded-2xl md:rounded-3xl p-4 border-2 border-[#334155] hover:border-[#93C5FD] transition-all duration-300 hover:shadow-xl hover:shadow-[#93C5FD]/20">
                         <div class="relative bg-[#0a0f1a] rounded-xl md:rounded-2xl overflow-hidden aspect-[4/5] mb-4">
                             <!-- SALE Badge -->
                             <span class="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider z-10 shadow-lg animate-pulse">SALE</span>
@@ -74,14 +74,11 @@
                         <div class="px-2">
                             <p class="text-[10px] font-bold text-[#60A5FA] uppercase tracking-widest mb-2">{{ $product->category->name }}</p>
                             <h3 class="font-heading font-bold text-lg md:text-xl text-white leading-tight mb-3 line-clamp-2">{{ $product->name }}</h3>
-                            <div class="flex items-center justify-between">
+                            <div class="flex items-center justify-between mt-auto">
                                 <span class="font-bold text-lg text-[#93C5FD]">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                                <a href="{{ route('product.show', $product->id) }}" class="px-4 py-2 bg-[#60A5FA] hover:bg-[#93C5FD] text-white text-xs font-bold uppercase rounded-lg transition-colors shadow-lg">
-                                    View
-                                </a>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 @endforeach
             </div>

@@ -2,59 +2,62 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Buyer;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.php
-     */
-    public function edit(Request $request): View
+    public function edit()
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
+        $user = Auth::user();
+        // Ensure user has a buyer record if they are a member
+        if ($user->isMember() && !$user->buyer) {
+            Buyer::create(['user_id' => $user->id]);
+            $user->refresh();
+        }
+        
+        return view('buyer.profile.edit', compact('user'));
     }
 
-    /**
-     * Update the user's profile information.
-     */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request)
     {
-        $request->user()->fill($request->validated());
+        $user = Auth::user();
+        
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'phone_number' => 'nullable|string|max:20',
+            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        // Update User Model
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+        ]);
+
+        // Update or Create Buyer Model
+        $buyer = $user->buyer ?? Buyer::create(['user_id' => $user->id]);
+
+        if ($request->has('phone_number')) {
+            $buyer->phone_number = $request->phone_number;
         }
 
-        $request->user()->save();
+        if ($request->hasFile('profile_picture')) {
+            // Delete old picture if exists
+            if ($buyer->profile_picture) {
+                Storage::disk('public')->delete($buyer->profile_picture);
+            }
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
-    }
+            // Store new picture
+            $path = $request->file('profile_picture')->store('profile-pictures', 'public');
+            $buyer->profile_picture = $path;
+        }
 
-    /**
-     * Delete the user's account.
-     */
-    public function destroy(Request $request): RedirectResponse
-    {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
-        ]);
+        $buyer->save();
 
-        $user = $request->user();
-
-        Auth::logout();
-
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
+        return redirect()->route('profile.edit')->with('success', 'Profile updated successfully!');
     }
 }

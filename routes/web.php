@@ -23,6 +23,9 @@ Route::get('/api/search', [BuyerController::class, 'searchProducts'])->name('api
 // Sale Products Page
 Route::get('/sale', [BuyerController::class, 'sale'])->name('sale');
 
+// Product Catalog Page
+Route::get('/products', [BuyerController::class, 'products'])->name('products.index');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', [BuyerController::class, 'checkout'])->name('checkout');
@@ -47,8 +50,8 @@ Route::get('/dashboard', function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    // Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy'); // Disable delete for now if not needed
 });
 
 require __DIR__.'/auth.php';

@@ -182,19 +182,29 @@
                         <div class="relative hidden md:block" x-data="{ open: false }">
                             <button @click="open = !open" @click.outside="open = false" 
                                     class="flex items-center gap-2 px-4 py-2 bg-[#F8F8FF] hover:bg-[#93C5FD]/20 rounded-full transition-colors group">
-                                <div class="w-7 h-7 bg-gradient-to-br from-[#60A5FA] to-[#1E3A8A] rounded-full flex items-center justify-center text-white text-xs font-bold">
-                                    {{ substr(Auth::user()->name, 0, 1) }}
+                                <div class="w-8 h-8 rounded-full overflow-hidden border border-gray-200">
+                                    @if(Auth::user()->buyer && Auth::user()->buyer->profile_picture)
+                                        <img src="{{ asset('storage/' . Auth::user()->buyer->profile_picture) }}" alt="Profile" class="w-full h-full object-cover">
+                                    @else
+                                        <div class="w-full h-full bg-gradient-to-br from-[#60A5FA] to-[#1E3A8A] flex items-center justify-center text-white text-xs font-bold">
+                                            {{ substr(Auth::user()->name, 0, 1) }}
+                                        </div>
+                                    @endif
                                 </div>
                                 <span class="text-sm font-bold text-slate-700 group-hover:text-[#60A5FA]">{{ Str::limit(Auth::user()->name, 10) }}</span>
                                 <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                 </svg>
                             </button>
-                            <div x-show="open" x-transition class="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-2xl py-2 border border-gray-100 overflow-hidden">
+                            <div x-show="open" x-transition class="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-2xl py-2 border border-gray-100 overflow-hidden z-50">
                                 <div class="px-4 py-3 border-b border-gray-100">
                                     <p class="text-xs text-slate-500 uppercase tracking-wide">Signed in as</p>
                                     <p class="text-sm font-bold text-slate-900 truncate">{{ Auth::user()->email }}</p>
                                 </div>
+                                <a href="{{ route('profile.edit') }}" class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-[#F8F8FF] hover:text-[#60A5FA] transition-colors flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                    My Profile
+                                </a>
                                 <a href="{{ route('transaction.history') }}" class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-[#F8F8FF] hover:text-[#60A5FA] transition-colors flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                                     My Orders

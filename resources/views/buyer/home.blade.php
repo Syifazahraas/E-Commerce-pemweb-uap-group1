@@ -170,7 +170,7 @@
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 mb-8">
                     @foreach($products as $product)
                     <div class="group">
-                        <div class="bg-gradient-to-br from-[#1a2332] to-[#0f172a] rounded-2xl md:rounded-3xl p-4 border-2 border-[#334155] hover:border-[#93C5FD] transition-all duration-300 hover:shadow-xl hover:shadow-[#93C5FD]/20">
+                        <a href="{{ route('product.show', $product->id) }}" class="block h-full bg-gradient-to-br from-[#1a2332] to-[#0f172a] rounded-2xl md:rounded-3xl p-4 border-2 border-[#334155] hover:border-[#93C5FD] transition-all duration-300 hover:shadow-xl hover:shadow-[#93C5FD]/20">
                             <div class="relative bg-[#0a0f1a] rounded-xl md:rounded-2xl overflow-hidden aspect-[4/5] mb-4">
                                 @if($product->stock < 5)
                                     <span class="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider z-10 shadow-lg">Low Stock</span>
@@ -192,15 +192,12 @@
                             
                             <div class="px-2">
                                 <p class="text-[10px] font-bold text-[#60A5FA] uppercase tracking-widest mb-2">{{ $product->category->name }}</p>
-                                <h3 class="font-heading font-bold text-lg md:text-xl text-white leading-tight mb-3 line-clamp-2">{{ $product->name }}</h3>
-                                <div class="flex items-center justify-between">
+                                <h3 class="font-heading font-bold text-lg md:text-xl text-white leading-tight mb-3 line-clamp-2 h-14">{{ $product->name }}</h3>
+                                <div class="flex items-center justify-between mt-auto">
                                     <span class="font-bold text-lg text-[#93C5FD]">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                                    <a href="{{ route('product.show', $product->id) }}" class="px-4 py-2 bg-[#60A5FA] hover:bg-[#93C5FD] text-white text-xs font-bold uppercase rounded-lg transition-colors shadow-lg">
-                                        View
-                                    </a>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                     @endforeach
                 </div>
@@ -227,7 +224,12 @@
                     <h2 class="font-heading font-black text-3xl md:text-4xl uppercase tracking-tighter text-white">Best Sellers</h2>
                     <p class="text-[#93C5FD] mt-2">Top picks from our collection</p>
                 </div>
-                <div class="hidden md:block w-32 h-1 bg-[#60A5FA] rounded-full"></div>
+                <a href="{{ route('products.index') }}" class="group flex items-center gap-2 text-[#60A5FA] font-bold uppercase tracking-wider text-sm hover:text-white transition-colors">
+                    View All
+                    <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                    </svg>
+                </a>
             </div>
 
             <!-- Horizontal Scroll Container -->
@@ -235,7 +237,7 @@
                 <div class="flex gap-4 md:gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
                     @foreach(App\Models\Product::with('images', 'category')->inRandomOrder()->take(8)->get() as $product)
                     <div class="flex-none w-64 md:w-72 snap-start group">
-                        <div class="bg-gradient-to-br from-[#1e293b] to-[#1a2332] rounded-2xl md:rounded-3xl p-4 border-2 border-[#334155] hover:border-[#60A5FA] transition-all duration-300 hover:shadow-xl hover:shadow-[#60A5FA]/20">
+                        <a href="{{ route('product.show', $product->id) }}" class="block h-full bg-gradient-to-br from-[#1e293b] to-[#1a2332] rounded-2xl md:rounded-3xl p-4 border-2 border-[#334155] hover:border-[#60A5FA] transition-all duration-300 hover:shadow-xl hover:shadow-[#60A5FA]/20">
                             <!-- Image -->
                             <div class="relative bg-[#0f172a] rounded-xl md:rounded-2xl overflow-hidden aspect-[4/5] mb-4">
                                 <span class="absolute top-3 left-3 bg-gradient-to-r from-[#60A5FA] to-[#93C5FD] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider z-10 shadow-lg">Best Seller</span>
@@ -255,15 +257,12 @@
                             <!-- Info -->
                             <div class="px-2">
                                 <p class="text-[10px] font-bold text-[#93C5FD] uppercase tracking-widest mb-2">{{ $product->category->name }}</p>
-                                <h3 class="font-heading font-bold text-lg md:text-xl text-white leading-tight mb-3 line-clamp-2">{{ $product->name }}</h3>
-                                <div class="flex items-center justify-between">
+                                <h3 class="font-heading font-bold text-lg md:text-xl text-white leading-tight mb-3 line-clamp-2 h-14">{{ $product->name }}</h3>
+                                <div class="flex items-center justify-between mt-auto">
                                     <span class="font-bold text-lg text-[#60A5FA]">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                                    <a href="{{ route('product.show', $product->id) }}" class="px-4 py-2 bg-gradient-to-r from-[#60A5FA] to-[#93C5FD] hover:from-[#93C5FD] hover:to-[#60A5FA] text-white text-xs font-bold uppercase rounded-lg transition-all shadow-lg">
-                                        View
-                                    </a>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                     @endforeach
                 </div>
@@ -290,7 +289,7 @@
             <div class="flex gap-4 md:gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
                 @foreach(App\Models\Product::with('images', 'category')->inRandomOrder()->take(8)->get() as $product)
                 <div class="flex-none w-64 md:w-72 snap-start group">
-                    <div class="bg-gradient-to-br from-[#1e293b] to-[#1a2332] rounded-2xl md:rounded-3xl p-4 border-2 border-[#334155] hover:border-[#60A5FA] transition-all duration-300 hover:shadow-xl hover:shadow-[#60A5FA]/20">
+                    <a href="{{ route('product.show', $product->id) }}" class="block h-full bg-gradient-to-br from-[#1e293b] to-[#1a2332] rounded-2xl md:rounded-3xl p-4 border-2 border-[#334155] hover:border-[#60A5FA] transition-all duration-300 hover:shadow-xl hover:shadow-[#60A5FA]/20">
                         <!-- Image -->
                         <div class="relative bg-[#0f172a] rounded-xl md:rounded-2xl overflow-hidden aspect-[4/5] mb-4">
                             <span class="absolute top-3 left-3 bg-gradient-to-r from-[#60A5FA] to-[#93C5FD] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider z-10 shadow-lg">Best Seller</span>
@@ -310,15 +309,12 @@
                         <!-- Info -->
                         <div class="px-2">
                             <p class="text-[10px] font-bold text-[#93C5FD] uppercase tracking-widest mb-2">{{ $product->category->name }}</p>
-                            <h3 class="font-heading font-bold text-lg md:text-xl text-white leading-tight mb-3 line-clamp-2">{{ $product->name }}</h3>
-                            <div class="flex items-center justify-between">
+                            <h3 class="font-heading font-bold text-lg md:text-xl text-white leading-tight mb-3 line-clamp-2 h-14">{{ $product->name }}</h3>
+                            <div class="flex items-center justify-between mt-auto">
                                 <span class="font-bold text-lg text-[#60A5FA]">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                                <a href="{{ route('product.show', $product->id) }}" class="px-4 py-2 bg-gradient-to-r from-[#60A5FA] to-[#93C5FD] hover:from-[#93C5FD] hover:to-[#60A5FA] text-white text-xs font-bold uppercase rounded-lg transition-all shadow-lg">
-                                    View
-                                </a>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 @endforeach
             </div>
@@ -334,6 +330,12 @@
                 <h2 class="font-heading font-black text-3xl md:text-4xl uppercase tracking-tighter text-white">All Products</h2>
                 <p class="text-[#93C5FD] mt-2">Discover our complete collection</p>
             </div>
+            <a href="{{ route('products.index') }}" class="group flex items-center gap-2 text-[#60A5FA] font-bold uppercase tracking-wider text-sm hover:text-white transition-colors">
+                View All
+                <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+            </a>
         </div>
 
         @if($products->count() > 0)
