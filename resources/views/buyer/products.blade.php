@@ -31,8 +31,6 @@
                         <div class="relative bg-gray-50 rounded-lg md:rounded-xl overflow-hidden aspect-[4/5] mb-3">
                             @if($product->stock < 5)
                                 <span class="absolute top-2 left-2 bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider z-10 shadow-lg">Low Stock</span>
-                            @elseif($product->created_at->diffInDays(now()) < 30)
-                                <span class="absolute top-2 left-2 bg-gradient-to-r from-blue-600 to-blue-400 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider z-10 shadow-lg">New</span>
                             @endif
                             
                             @if($product->images && $product->images->count() > 0)
