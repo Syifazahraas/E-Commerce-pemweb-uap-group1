@@ -31,7 +31,7 @@ class ProductController extends Controller
             $products = Product::where('store_id', $store->id)
                               ->with('productCategory', 'productImages')
                               ->latest()
-                              ->paginate(15);
+                              ->paginate(5);
 
             return view('seller.products.index', compact('products'));
         } catch (\Exception $e) {
@@ -63,7 +63,6 @@ class ProductController extends Controller
 
     /**
      * Store a newly created product in storage
-     * Note: Image upload handled by ProductImageController
      */
     public function store(Request $request)
     {
@@ -72,9 +71,13 @@ class ProductController extends Controller
             'product_category_id' => 'required|exists:product_categories,id',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
-            'weight' => 'nullable|numeric|min:0',
+            'weight' => 'required|integer|min:0',
             'condition' => 'required|in:new,second',
-            'description' => 'nullable|string|max:5000',
+            'description' => 'required|string|max:10000',
+            'material' => 'nullable|string|max:255',
+            'sizes' => 'nullable|array',
+            'sizes.*' => 'string|max:10',
+            'is_on_sale' => 'nullable|boolean',
         ], [
             'name.required' => 'Nama produk wajib diisi.',
             'name.max' => 'Nama produk maksimal 255 karakter.',
@@ -85,8 +88,11 @@ class ProductController extends Controller
             'price.min' => 'Harga tidak boleh kurang dari 0.',
             'stock.required' => 'Stok wajib diisi.',
             'stock.integer' => 'Stok harus berupa angka bulat.',
+            'weight.required' => 'Berat wajib diisi.',
+            'weight.integer' => 'Berat harus berupa angka bulat.',
             'condition.required' => 'Kondisi wajib dipilih.',
             'condition.in' => 'Kondisi harus Baru atau Bekas.',
+            'description.required' => 'Deskripsi wajib diisi.',
         ]);
 
         DB::beginTransaction();
@@ -107,9 +113,12 @@ class ProductController extends Controller
             $product->slug = Str::slug($validated['name']) . '-' . Str::random(6);
             $product->price = $validated['price'];
             $product->stock = $validated['stock'];
-            $product->weight = $validated['weight'] ?? 0;
+            $product->weight = $validated['weight'];
             $product->condition = $validated['condition'];
-            $product->description = $validated['description'] ?? null;
+            $product->description = $validated['description'];
+            $product->material = $validated['material'] ?? null;
+            $product->sizes = $validated['sizes'] ?? null;
+            $product->is_on_sale = $request->boolean('is_on_sale', false);
 
             if (!$product->save()) {
                 DB::rollBack();
@@ -122,7 +131,6 @@ class ProductController extends Controller
 
             DB::commit();
 
-            // Redirect ke halaman upload gambar atau langsung ke edit dengan session
             return redirect()->route('seller.products.edit', $product->id)
                              ->with('success', 'Produk berhasil ditambahkan. Silakan upload gambar produk.')
                              ->with('new_product', true);
@@ -194,7 +202,6 @@ class ProductController extends Controller
 
     /**
      * Update the specified product in storage
-     * Note: Image upload handled by ProductImageController
      */
     public function update(Request $request, $id)
     {
@@ -203,15 +210,21 @@ class ProductController extends Controller
             'product_category_id' => 'required|exists:product_categories,id',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
-            'weight' => 'nullable|numeric|min:0',
+            'weight' => 'required|integer|min:0',
             'condition' => 'required|in:new,second',
-            'description' => 'nullable|string|max:5000',
+            'description' => 'required|string|max:10000',
+            'material' => 'nullable|string|max:255',
+            'sizes' => 'nullable|array',
+            'sizes.*' => 'string|max:10',
+            'is_on_sale' => 'nullable|boolean',
         ], [
             'name.required' => 'Nama produk wajib diisi.',
             'product_category_id.required' => 'Kategori wajib dipilih.',
             'price.required' => 'Harga wajib diisi.',
             'stock.required' => 'Stok wajib diisi.',
+            'weight.required' => 'Berat wajib diisi.',
             'condition.required' => 'Kondisi wajib dipilih.',
+            'description.required' => 'Deskripsi wajib diisi.',
         ]);
 
         DB::beginTransaction();
@@ -230,9 +243,12 @@ class ProductController extends Controller
             $product->name = $validated['name'];
             $product->price = $validated['price'];
             $product->stock = $validated['stock'];
-            $product->weight = $validated['weight'] ?? 0;
+            $product->weight = $validated['weight'];
             $product->condition = $validated['condition'];
-            $product->description = $validated['description'] ?? null;
+            $product->description = $validated['description'];
+            $product->material = $validated['material'] ?? null;
+            $product->sizes = $validated['sizes'] ?? null;
+            $product->is_on_sale = $request->boolean('is_on_sale', false);
 
             if (!$product->save()) {
                 DB::rollBack();

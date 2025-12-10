@@ -54,7 +54,7 @@ Route::get('/dashboard', function () {
 
     if ($user->role === 'admin') {
         return redirect()->route('admin.stores.index');
-    } elseif ($user->isSeller()) {
+    } elseif ($user->role === 'seller') {
         return redirect()->route('seller.dashboard');
     }
     return redirect()->route('home');

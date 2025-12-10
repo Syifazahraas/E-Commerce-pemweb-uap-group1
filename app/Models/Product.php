@@ -7,24 +7,26 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
 
-    protected $fillable = [
-        'store_id',
-        'product_category_id',
-        'name',
-        'slug',
-        'description',
-        'condition',
-        'price',
-        'weight',
-        'stock',
-        'material',
-        'sizes',
-    ];
+   protected $fillable = [
+    'store_id',
+    'product_category_id',
+    'name',
+    'slug',
+    'description',
+    'condition',
+    'price',
+    'weight',
+    'stock',
+    'material',
+    'sizes',
+    'is_on_sale', // TAMBAHKAN INI
+];
 
-    protected $casts = [
-        'price' => 'decimal:2',
-        'sizes' => 'array',
-    ];
+protected $casts = [
+    'price' => 'decimal:2',
+    'sizes' => 'array',
+    'is_on_sale' => 'boolean', // TAMBAHKAN INI
+];
 
     public function store()
     {
@@ -34,7 +36,7 @@ class Product extends Model
     {
         return $this->belongsTo(ProductCategory::class);
     }
-    
+
     public function category()
     {
         return $this->belongsTo(ProductCategory::class, 'product_category_id');
@@ -44,12 +46,12 @@ class Product extends Model
     {
         return $this->hasMany(ProductImage::class);
     }
-    
+
     public function images()
     {
         return $this->hasMany(ProductImage::class);
     }
-    
+
     public function reviews()
     {
         return $this->hasMany(ProductReview::class, 'product_id');

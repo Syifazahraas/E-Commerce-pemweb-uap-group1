@@ -19,16 +19,16 @@ class OrderController extends Controller
                 ->with('error', 'Anda belum memiliki toko.');
         }
 
-        // Get orders with filter
+        // Query awal
         $query = Transaction::where('store_id', $store->id)
             ->with(['buyer.user', 'transactionDetails.product']);
 
-        // Filter by payment status
-        if ($request->has('payment_status') && $request->payment_status != '') {
-            $query->where('payment_status', $request->payment_status);
+        // Filter berdasarkan status pembayaran (sekarang nama field: status)
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
         }
 
-        // Filter by tracking status
+        // Filter tracking (resinya)
         if ($request->has('tracking_status')) {
             if ($request->tracking_status == 'unshipped') {
                 $query->whereNull('tracking_number');
@@ -37,20 +37,22 @@ class OrderController extends Controller
             }
         }
 
-        // Search by order code
+        // Pencarian kode order
         if ($request->has('search') && $request->search != '') {
             $query->where('code', 'like', '%' . $request->search . '%');
         }
 
         $orders = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        // Statistics
+        // Statistik
         $totalOrders = Transaction::where('store_id', $store->id)->count();
+
         $unpaidOrders = Transaction::where('store_id', $store->id)
-            ->where('payment_status', 'unpaid')
+            ->where('status', 'unpaid') // sekarang pakai status
             ->count();
+
         $unshippedOrders = Transaction::where('store_id', $store->id)
-            ->where('payment_status', 'paid')
+            ->where('status', 'paid')
             ->whereNull('tracking_number')
             ->count();
 
@@ -78,16 +80,15 @@ class OrderController extends Controller
     {
         $request->validate([
             'tracking_number' => 'required|string|max:100',
-            'shipping' => 'required|string|max:100',
+            'shipping_type' => 'required|string|max:100', // field baru
         ]);
 
         try {
             $store = Auth::user()->store;
-
             $order = Transaction::where('store_id', $store->id)->findOrFail($id);
 
-            // Check if order is paid
-            if ($order->payment_status != 'paid') {
+            // Cek apakah sudah dibayar
+            if ($order->status != 'paid') {
                 return redirect()->back()
                     ->with('error', 'Pesanan belum dibayar. Tidak dapat menambahkan nomor resi.');
             }
@@ -95,14 +96,13 @@ class OrderController extends Controller
             DB::beginTransaction();
 
             $order->tracking_number = $request->tracking_number;
-            $order->shipping = $request->shipping;
+            $order->shipping_type = $request->shipping_type; // field baru
             $order->save();
 
             DB::commit();
 
             return redirect()->back()
                 ->with('success', 'Nomor resi berhasil ditambahkan.');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
@@ -114,21 +114,19 @@ class OrderController extends Controller
     {
         $request->validate([
             'tracking_number' => 'nullable|string|max:100',
-            'shipping' => 'required|string|max:100',
+            'shipping_type' => 'required|string|max:100', // field baru
         ]);
 
         try {
             $store = Auth::user()->store;
-
             $order = Transaction::where('store_id', $store->id)->findOrFail($id);
 
             $order->tracking_number = $request->tracking_number;
-            $order->shipping = $request->shipping;
+            $order->shipping_type = $request->shipping_type;
             $order->save();
 
             return redirect()->back()
                 ->with('success', 'Informasi pengiriman berhasil diperbarui.');
-
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());

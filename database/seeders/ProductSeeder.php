@@ -35,6 +35,7 @@ class ProductSeeder extends Seeder
             ];
 
             $createdCategories = [];
+
             foreach ($categoriesWithStore as $cat) {
                 $cat['store_id'] = $store->id;
 
@@ -52,8 +53,13 @@ class ProductSeeder extends Seeder
             $this->command->info("✓ Categories with store_id created: " . count($categoriesWithStore));
 
 
+            /*
+            |--------------------------------------------------------------------------
+            | FIXED — Categories without store_id (global categories)
+            | Sekarang ditambahkan store_id agar tidak error.
+            |--------------------------------------------------------------------------
+            */
 
-            // Categories from ORIGIN/USER-SYIFA (without store_id)
             $globalCategories = [
                 ['name' => 'Sneakers', 'description' => 'Casual and stylish sneakers'],
                 ['name' => 'Running Shoes', 'description' => 'Performance running shoes'],
@@ -63,11 +69,16 @@ class ProductSeeder extends Seeder
             ];
 
             foreach ($globalCategories as $gc) {
+
                 $category = ProductCategory::updateOrCreate(
-                    ['slug' => Str::slug($gc['name'])],
+                    [
+                        'slug' => Str::slug($gc['name']),
+                        'store_id' => $store->id, // FIX WAJIB
+                    ],
                     [
                         'name' => $gc['name'],
                         'description' => $gc['description'],
+                        'store_id' => $store->id, // FIX WAJIB
                     ]
                 );
 
@@ -75,7 +86,6 @@ class ProductSeeder extends Seeder
             }
 
             $this->command->info("✓ Global shoe categories created: " . count($globalCategories));
-
 
 
             /*
@@ -141,15 +151,13 @@ class ProductSeeder extends Seeder
                         'price' => $p['price'],
                         'stock' => $p['stock'],
                         'condition' => $p['condition'],
-                        'product_category_id' =>
-                            $createdCategories[$p['category']],
+                        'product_category_id' => $createdCategories[$p['category']],
                         'weight' => 1000,
                     ]
                 );
             }
 
             $this->command->info("✓ Products from HEAD created: " . count($productsHead));
-
 
 
             // Products from ORIGIN/USER-SYIFA
@@ -176,8 +184,7 @@ class ProductSeeder extends Seeder
                     [
                         'name' => $p['name'],
                         'store_id' => $store->id,
-                        'product_category_id' =>
-                            $createdCategories[$p['category']],
+                        'product_category_id' => $createdCategories[$p['category']],
                         'description' => $p['description'],
                         'price' => $p['price'],
                         'stock' => $p['stock'],
@@ -190,7 +197,6 @@ class ProductSeeder extends Seeder
             }
 
             $this->command->info("✓ Shoe products created: " . count($productsShoes));
-
             $this->command->info("All product seeding complete!");
         });
     }

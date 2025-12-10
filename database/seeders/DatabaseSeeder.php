@@ -25,11 +25,11 @@ class DatabaseSeeder extends Seeder
         // Call all required seeders (merged)
         $this->call([
             AdminUserSeeder::class,       // from origin/user-syifa
-            StoreBalanceSeeder::class,    // from HEAD
             SellerSeeder::class,          // from origin/user-syifa
-            BuyerSeeder::class,           // both branches
-            ProductSeeder::class,         // both branches
-            TransactionSeeder::class,     // from HEAD
+            // StoreBalanceSeeder::class,    // from HEAD
+            // BuyerSeeder::class,           // both branches
+            // ProductSeeder::class,         // both branches
+            // TransactionSeeder::class,     // from HEAD
         ]);
     }
 }

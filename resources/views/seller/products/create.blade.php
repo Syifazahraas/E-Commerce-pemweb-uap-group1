@@ -109,11 +109,11 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="description" class="form-label">Deskripsi Produk</label>
+                    <label for="description" class="form-label">Deskripsi Produk <span class="text-danger">*</span></label>
                     <textarea class="form-control @error('description') is-invalid @enderror"
                               id="description" name="description" placeholder="Deskripsikan produk Anda dengan detail..."
-                              rows="5">{{ old('description') }}</textarea>
-                    <small class="form-text">Deskripsi lengkap produk (maksimal 5000 karakter)</small>
+                              rows="5" required>{{ old('description') }}</textarea>
+                    <small class="form-text">Deskripsi lengkap produk (wajib diisi)</small>
                     @error('description')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
@@ -160,17 +160,60 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="weight" class="form-label">Berat <span class="text-muted">(opsional)</span></label>
+                    <label for="weight" class="form-label">Berat <span class="text-danger">*</span></label>
                     <div class="input-group">
                         <input type="number" class="form-control @error('weight') is-invalid @enderror"
                                id="weight" name="weight" placeholder="0"
-                               value="{{ old('weight') }}" min="0" step="0.1">
-                        <span class="input-group-text">kg</span>
+                               value="{{ old('weight') }}" min="0" required>
+                        <span class="input-group-text">gram</span>
                     </div>
-                    <small class="form-text">Berat produk untuk perhitungan ongkir</small>
+                    <small class="form-text">Berat produk dalam gram untuk perhitungan ongkir</small>
                     @error('weight')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
+                </div>
+            </div>
+
+            <!-- Detail Produk Section (Opsional - untuk sepatu) -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <h5><i class="fas fa-shoe-prints"></i> Detail Produk Tambahan</h5>
+                    <p>Opsional - Khusus untuk produk seperti sepatu, tas, dll.</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="material" class="form-label">Material <span class="text-muted">(opsional)</span></label>
+                    <input type="text" class="form-control @error('material') is-invalid @enderror"
+                           id="material" name="material" placeholder="Contoh: Kulit Asli, Canvas, Suede"
+                           value="{{ old('material') }}">
+                    <small class="form-text">Material/bahan pembuatan produk</small>
+                    @error('material')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Ukuran Tersedia <span class="text-muted">(opsional)</span></label>
+                    <div id="sizesContainer">
+                        <div class="size-input-group mb-2">
+                            <input type="text" class="form-control" name="sizes[]" placeholder="Contoh: 39, 40, M, L, XL">
+                            <button type="button" class="btn btn-sm btn-success" onclick="addSizeInput()">
+                                <i class="fas fa-plus"></i> Tambah
+                            </button>
+                        </div>
+                    </div>
+                    <small class="form-text">Tambahkan ukuran yang tersedia untuk produk ini</small>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="is_on_sale" name="is_on_sale" value="1"
+                               {{ old('is_on_sale') ? 'checked' : '' }}>
+                        <label class="form-check-label" for="is_on_sale">
+                            <i class="fas fa-tag"></i> Produk Sedang Diskon/Promo
+                        </label>
+                    </div>
+                    <small class="form-text">Tandai jika produk ini sedang dalam masa promo atau diskon</small>
                 </div>
             </div>
 
@@ -195,5 +238,26 @@
         </form>
     </div>
 </div>
+
+@push('scripts')
+<script>
+function addSizeInput() {
+    const container = document.getElementById('sizesContainer');
+    const newInput = document.createElement('div');
+    newInput.className = 'size-input-group mb-2';
+    newInput.innerHTML = `
+        <input type="text" class="form-control" name="sizes[]" placeholder="Contoh: 39, 40, M, L, XL">
+        <button type="button" class="btn btn-sm btn-danger" onclick="removeSizeInput(this)">
+            <i class="fas fa-times"></i> Hapus
+        </button>
+    `;
+    container.appendChild(newInput);
+}
+
+function removeSizeInput(btn) {
+    btn.parentElement.remove();
+}
+</script>
+@endpush
 
 @endsection

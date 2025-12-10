@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Transaction;
+use App\Models\ProductReview;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -62,7 +63,7 @@ class BuyerController extends Controller
         $query = Product::with(['category', 'images'])->where('stock', '>', 0);
 
         // Simple sort filters could be added here later
-        
+
         $products = $query->orderBy('created_at', 'desc')->paginate(20);
 
         return view('buyer.products', compact('products'));
@@ -71,7 +72,7 @@ class BuyerController extends Controller
     public function productDetail($id)
     {
         $product = Product::with(['category', 'images', 'reviews.transaction.buyer.user'])->findOrFail($id);
-        
+
         $canReview = false;
         if (Auth::check() && Auth::user()->buyer) {
             // Check if user bought product and hasn't reviewed it
@@ -87,11 +88,11 @@ class BuyerController extends Controller
                     ->whereHas('transaction', function($q) {
                         $q->where('buyer_id', Auth::user()->buyer->id);
                     })->exists();
-                
+
                 $canReview = !$existingReview;
             }
         }
-        
+
         return view('buyer.product-detail', compact('product', 'canReview'));
     }
 
@@ -115,7 +116,7 @@ class BuyerController extends Controller
         }
 
         $cart = session()->get('cart', []);
-        
+
         // Generate a unique key validation based on product ID AND size
         $cartKey = $product->id . '-' . $request->size;
 
@@ -163,7 +164,7 @@ class BuyerController extends Controller
                     $cart[$id]['subtotal'] = $cart[$id]['qty'] * $cart[$id]['price'];
                 }
             }
-            
+
             session()->put('cart', $cart);
         }
 
@@ -217,7 +218,7 @@ class BuyerController extends Controller
             // Calculate totals
             $subtotal = collect($cart)->sum('subtotal');
             $shippingCost = 0;
-            
+
             switch($request->shipping_type) {
                 case 'Express': $shippingCost = 30000; break;
                 case 'Same Day': $shippingCost = 50000; break;
@@ -291,11 +292,11 @@ class BuyerController extends Controller
     public function searchProducts(Request $request)
     {
         $search = $request->get('q', '');
-        
+
         if (strlen($search) < 2) {
             return response()->json([]);
         }
-        
+
         $products = Product::with(['category', 'images'])
             ->where('name', 'like', '%' . $search . '%')
             ->where('stock', '>', 0)
@@ -306,11 +307,11 @@ class BuyerController extends Controller
                 $imageUrl = null;
                 if ($product->images && $product->images->first()) {
                     $image = $product->images->first()->image;
-                    $imageUrl = str_starts_with($image, 'http') 
-                        ? $image 
+                    $imageUrl = str_starts_with($image, 'http')
+                        ? $image
                         : asset('storage/' . $image);
                 }
-                
+
                 return [
                     'id' => $product->id,
                     'name' => $product->name,
@@ -321,7 +322,7 @@ class BuyerController extends Controller
                     'url' => route('product.show', $product->id),
                 ];
             });
-        
+
         return response()->json($products);
     }
 }

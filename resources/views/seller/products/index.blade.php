@@ -4,6 +4,162 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/seller/product/product.css') }}">
+    <style>
+        /* Additional styles for full table */
+        .table {
+            font-size: 0.875rem;
+        }
+
+        .table td {
+            vertical-align: middle;
+            padding: 12px 8px;
+        }
+
+        .product-thumbnail {
+            width: 60px;
+            height: 60px;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .product-img-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f0f0;
+            border-radius: 6px;
+            color: #999;
+        }
+
+        .product-name {
+            margin: 0;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #2c3e50;
+        }
+
+        .product-slug {
+            color: #7f8c8d;
+            font-size: 0.75rem;
+        }
+
+        .price-badge {
+            font-weight: 600;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+            white-space: nowrap;
+        }
+
+        .stock-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .stock-high {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .stock-low {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .stock-empty {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .condition-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .condition-new {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .condition-second {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .weight-badge {
+            color: #6c757d;
+            font-size: 0.8rem;
+        }
+
+        .material-text {
+            color: #495057;
+            font-size: 0.8rem;
+        }
+
+        .sizes-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .size-chip {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #e9ecef;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            color: #495057;
+        }
+
+        .promo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: #ff6b6b;
+            color: white;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        /* Sticky first column */
+        .table thead th:first-child,
+        .table tbody td:first-child {
+            position: sticky;
+            left: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        .table thead th:first-child {
+            z-index: 11;
+        }
+    </style>
 @endpush
 
 @section('content')
@@ -51,21 +207,27 @@
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table">
+                <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Gambar</th>
-                            <th>Produk</th>
-                            <th>Kategori</th>
-                            <th>Harga</th>
-                            <th>Stok</th>
-                            <th>Kondisi</th>
-                            <th>Aksi</th>
+                            <th style="min-width: 80px;">Gambar</th>
+                            <th style="min-width: 200px;">Produk</th>
+                            <th style="min-width: 120px;">Kategori</th>
+                            <th style="min-width: 120px;">Harga</th>
+                            <th style="min-width: 80px;">Stok</th>
+                            <th style="min-width: 100px;">Berat</th>
+                            <th style="min-width: 100px;">Kondisi</th>
+                            <th style="min-width: 150px;">Material</th>
+                            <th style="min-width: 150px;">Ukuran</th>
+                            <th style="min-width: 100px;">Status</th>
+                            <th style="min-width: 150px;">Deskripsi</th>
+                            <th style="min-width: 120px; text-align: center;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($products as $product)
                             <tr>
+                                <!-- Gambar -->
                                 <td>
                                     <div class="product-thumbnail">
                                         @if ($product->productImages->count() > 0)
@@ -79,42 +241,117 @@
                                         @endif
                                     </div>
                                 </td>
+
+                                <!-- Produk -->
                                 <td>
                                     <div class="product-info">
-                                        <h6 class="product-name">{{ Str::limit($product->name, 40) }}</h6>
+                                        <h6 class="product-name" title="{{ $product->name }}">
+                                            {{ Str::limit($product->name, 40) }}
+                                        </h6>
                                         <small class="product-slug">{{ $product->slug }}</small>
                                     </div>
                                 </td>
+
+                                <!-- Kategori -->
                                 <td>
                                     <span class="badge bg-light text-dark">
                                         {{ $product->productCategory->name }}
                                     </span>
                                 </td>
+
+                                <!-- Harga -->
                                 <td>
                                     <span class="price-badge">
                                         Rp {{ number_format($product->price, 0, ',', '.') }}
                                     </span>
                                 </td>
+
+                                <!-- Stok -->
                                 <td>
                                     <span class="stock-badge {{ $product->stock > 10 ? 'stock-high' : ($product->stock > 0 ? 'stock-low' : 'stock-empty') }}">
                                         {{ $product->stock }} pcs
                                     </span>
                                 </td>
+
+                                <!-- Berat -->
+                                <td>
+                                    <span class="weight-badge">
+                                        <i class="fas fa-weight"></i> {{ number_format($product->weight, 0) }} gr
+                                    </span>
+                                </td>
+
+                                <!-- Kondisi -->
                                 <td>
                                     <span class="condition-badge condition-{{ $product->condition }}">
                                         {{ $product->condition === 'new' ? 'Baru' : 'Bekas' }}
                                     </span>
                                 </td>
+
+                                <!-- Material -->
+                                <td>
+                                    @if($product->material)
+                                        <span class="material-text" title="{{ $product->material }}">
+                                            {{ Str::limit($product->material, 20) }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+
+                                <!-- Ukuran -->
+                                <td>
+                                    @if($product->sizes && count($product->sizes) > 0)
+                                        <div class="sizes-container">
+                                            @foreach(array_slice($product->sizes, 0, 3) as $size)
+                                                <span class="size-chip">{{ $size }}</span>
+                                            @endforeach
+                                            @if(count($product->sizes) > 3)
+                                                <span class="size-chip">+{{ count($product->sizes) - 3 }}</span>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+
+                                <!-- Status Promo -->
+                                <td>
+                                    @if($product->is_on_sale)
+                                        <span class="promo-badge">
+                                            <i class="fas fa-tag"></i> Promo
+                                        </span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+
+                                <!-- Deskripsi -->
+                                <td>
+                                    @if($product->description)
+                                        <span class="text-muted" title="{{ $product->description }}">
+                                            {{ Str::limit($product->description, 50) }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+
+                                <!-- Aksi -->
                                 <td>
                                     <div class="action-buttons">
                                         <a href="{{ route('seller.products.edit', $product->id) }}"
                                            class="btn btn-sm btn-warning"
-                                           title="Edit">
+                                           title="Edit Produk">
                                             <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{{ route('seller.products.images.manage', $product->id) }}"
+                                           class="btn btn-sm btn-info"
+                                           title="Kelola Gambar">
+                                            <i class="fas fa-images"></i>
                                         </a>
                                         <button class="btn btn-sm btn-danger"
                                                 onclick="confirmDelete({{ $product->id }})"
-                                                title="Hapus">
+                                                title="Hapus Produk">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>

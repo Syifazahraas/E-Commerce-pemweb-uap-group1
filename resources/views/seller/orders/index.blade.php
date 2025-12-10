@@ -96,20 +96,37 @@
                            value="{{ request('search') }}"
                            placeholder="Cari kode pesanan...">
                 </div>
+
                 <div class="col-lg-3 col-md-6">
-                    <select class="form-select" name="payment_status">
+                    <select class="form-select" name="status">
                         <option value="">Semua Status Pembayaran</option>
-                        <option value="unpaid" {{ request('payment_status') == 'unpaid' ? 'selected' : '' }}>Belum Dibayar</option>
-                        <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Sudah Dibayar</option>
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>
+                            Pending
+                        </option>
+                        <option value="waiting_payment" {{ request('status') == 'waiting_payment' ? 'selected' : '' }}>
+                            Menunggu Pembayaran
+                        </option>
+                        <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>
+                            Sudah Dibayar
+                        </option>
+                        <option value="shipped" {{ request('status') == 'shipped' ? 'selected' : '' }}>
+                            Dikirim
+                        </option>
                     </select>
                 </div>
+
                 <div class="col-lg-3 col-md-6">
                     <select class="form-select" name="tracking_status">
                         <option value="">Semua Status Pengiriman</option>
-                        <option value="unshipped" {{ request('tracking_status') == 'unshipped' ? 'selected' : '' }}>Belum Dikirim</option>
-                        <option value="shipped" {{ request('tracking_status') == 'shipped' ? 'selected' : '' }}>Sudah Dikirim</option>
+                        <option value="unshipped" {{ request('tracking_status') == 'unshipped' ? 'selected' : '' }}>
+                            Belum Dikirim
+                        </option>
+                        <option value="shipped" {{ request('tracking_status') == 'shipped' ? 'selected' : '' }}>
+                            Sudah Dikirim
+                        </option>
                     </select>
                 </div>
+
                 <div class="col-lg-2 col-md-6">
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary flex-fill">
@@ -131,6 +148,7 @@
         <i class="fas fa-list me-2"></i>Daftar Pesanan
     </div>
     <div class="card-body">
+
         @if ($orders->count() > 0)
             <div class="orders-list">
                 @foreach ($orders as $order)
@@ -143,17 +161,29 @@
                                     {{ $order->created_at->format('d M Y, H:i') }}
                                 </small>
                             </div>
+
                             <div class="order-status">
-                                @if($order->payment_status === 'paid')
+
+                                {{-- STATUS PEMBAYARAN SESUAI MIGRATION --}}
+                                @if($order->status === 'paid')
                                     <span class="badge badge-success">
                                         <i class="fas fa-check-circle me-1"></i>Dibayar
                                     </span>
-                                @else
+                                @elseif($order->status === 'waiting_payment')
                                     <span class="badge badge-warning">
-                                        <i class="fas fa-clock me-1"></i>Belum Dibayar
+                                        <i class="fas fa-clock me-1"></i>Menunggu Pembayaran
+                                    </span>
+                                @elseif($order->status === 'pending')
+                                    <span class="badge badge-secondary">
+                                        <i class="fas fa-clock me-1"></i>Pending
+                                    </span>
+                                @else
+                                    <span class="badge badge-info">
+                                        <i class="fas fa-info-circle me-1"></i>{{ ucfirst($order->status) }}
                                     </span>
                                 @endif
 
+                                {{-- STATUS PENGIRIMAN --}}
                                 @if($order->tracking_number)
                                     <span class="badge badge-info">
                                         <i class="fas fa-shipping-fast me-1"></i>Dikirim
@@ -202,8 +232,9 @@
                                 </div>
                                 <div class="order-detail-item">
                                     <span class="label">Pengiriman:</span>
-                                    <span class="value">{{ $order->shipping }} - {{ $order->shipping_type }}</span>
+                                    <span class="value">{{ $order->shipping_type }}</span>
                                 </div>
+
                                 @if($order->tracking_number)
                                     <div class="order-detail-item">
                                         <span class="label">Nomor Resi:</span>
@@ -214,7 +245,9 @@
 
                             <div class="order-total">
                                 <span class="total-label">Total Pembayaran</span>
-                                <span class="total-amount">Rp {{ number_format($order->grand_total, 0, ',', '.') }}</span>
+                                <span class="total-amount">
+                                    Rp {{ number_format($order->grand_total, 0, ',', '.') }}
+                                </span>
                             </div>
                         </div>
 
@@ -227,10 +260,10 @@
                 @endforeach
             </div>
 
-            <!-- Pagination -->
             <div class="d-flex justify-content-center mt-4">
                 {{ $orders->links('vendor.pagination.custom') }}
             </div>
+
         @else
             <div class="empty-state">
                 <i class="fas fa-shopping-cart"></i>
