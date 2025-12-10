@@ -40,17 +40,17 @@ class ProductSeeder extends Seeder
 
         // Sample products
         $products = [
-            ['name' => 'Air Max Classic White', 'description' => 'Iconic white sneakers with maximum comfort and breathable design.', 'price' => 850000, 'stock' => 15, 'category' => 'Sneakers'],
-            ['name' => 'Urban Black Sneakers', 'description' => 'Sleek black sneakers perfect for urban style.', 'price' => 650000, 'stock' => 20, 'category' => 'Sneakers'],
-            ['name' => 'Retro Blue Runners', 'description' => 'Vintage-inspired blue sneakers with modern comfort.', 'price' => 750000, 'stock' => 12, 'category' => 'Sneakers'],
-            ['name' => 'Pro Runner 3000', 'description' => 'Professional running shoes with advanced cushioning.', 'price' => 1200000, 'stock' => 10, 'category' => 'Running Shoes'],
-            ['name' => 'Speed Boost Elite', 'description' => 'High-performance running shoes designed for speed.', 'price' => 1500000, 'stock' => 8, 'category' => 'Running Shoes'],
-            ['name' => 'Classic Brown Loafers', 'description' => 'Elegant brown leather loafers for professionals.', 'price' => 900000, 'stock' => 18, 'category' => 'Loafers'],
-            ['name' => 'Navy Suede Loafers', 'description' => 'Sophisticated navy suede loafers.', 'price' => 950000, 'stock' => 14, 'category' => 'Loafers'],
-            ['name' => 'Mountain Hiker Boots', 'description' => 'Rugged hiking boots for tough terrains.', 'price' => 1100000, 'stock' => 12, 'category' => 'Boots'],
-            ['name' => 'Chelsea Ankle Boots', 'description' => 'Stylish brown chelsea boots.', 'price' => 880000, 'stock' => 16, 'category' => 'Boots'],
-            ['name' => 'Beach Sandals', 'description' => 'Comfortable sandals for summer.', 'price' => 250000, 'stock' => 30, 'category' => 'Sandals'],
-            ['name' => 'Sport Slide Sandals', 'description' => 'Athletic sandals with cushioned footbed.', 'price' => 350000, 'stock' => 25, 'category' => 'Sandals'],
+            ['name' => 'New Balance 530 Unisex Sneakers', 'description' => 'Classic retro style meets modern comfort in the New Balance 530.', 'price' => 1499000, 'stock' => 15, 'category' => 'Sneakers'],
+            ['name' => 'Classic Clog Kids Bone', 'description' => 'Comfortable and lightweight clogs for kids, perfect for everyday wear.', 'price' => 599000, 'stock' => 20, 'category' => 'Sandals'],
+            ['name' => 'Handball Spezial Mens Sneakers', 'description' => 'Vintage handball design updated for the streets.', 'price' => 1700000, 'stock' => 12, 'category' => 'Sneakers'],
+            ['name' => 'Cortez Mens Sneakers', 'description' => 'The original running shoe, now a street style icon.', 'price' => 1299000, 'stock' => 10, 'category' => 'Sneakers'],
+            ['name' => 'Speed Boost Elite', 'description' => 'High-performance running shoes designed for maximum speed and energy return.', 'price' => 1500000, 'stock' => 8, 'category' => 'Running Shoes'],
+            ['name' => 'Air Jordan 1 Retro Low OG', 'description' => 'Premium materials and iconic design in a low-top silhouette.', 'price' => 2499000, 'stock' => 5, 'category' => 'Sneakers'],
+            ['name' => 'Sunray Protect 4 Boys Sandals', 'description' => 'Protective and quick-drying sandals for active kids.', 'price' => 499000, 'stock' => 18, 'category' => 'Sandals'],
+            ['name' => 'Cloud 6 Mens Sneakers', 'description' => 'Ultra-lightweight running shoes with cloud-like cushioning.', 'price' => 2100000, 'stock' => 14, 'category' => 'Running Shoes'],
+            ['name' => 'Adizero Evo SL Womens Running Shoes', 'description' => 'Top-tier racing shoes for breaking personal records.', 'price' => 2800000, 'stock' => 7, 'category' => 'Running Shoes'],
+            ['name' => 'Skate Loafer Mens Sneakers', 'description' => 'A unique blend of skate durability and loafer style.', 'price' => 1100000, 'stock' => 16, 'category' => 'Loafers'],
+            ['name' => 'Floody Blue Leather Boots', 'description' => 'Rugged leather boots with a stylish blue finish.', 'price' => 1850000, 'stock' => 12, 'category' => 'Boots'],
         ];
 
         foreach ($products as $p) {

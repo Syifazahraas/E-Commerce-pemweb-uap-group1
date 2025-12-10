@@ -26,34 +26,34 @@
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3 mb-8">
                 @foreach($products as $product)
                 <div class="group">
-                    <a href="{{ route('product.show', $product->id) }}" class="block h-full bg-gradient-to-br from-[#1a2332] to-[#0f172a] rounded-xl md:rounded-2xl p-3 border border-[#334155] hover:border-[#60A5FA] transition-all duration-300 hover:shadow-xl hover:shadow-[#60A5FA]/20 group-hover:-translate-y-1">
+                    <a href="{{ route('product.show', $product->id) }}" class="block h-full bg-white rounded-xl md:rounded-2xl p-3 border border-gray-100 hover:border-blue-400 transition-all duration-300 hover:shadow-xl hover:shadow-blue-200/50 group-hover:-translate-y-1">
                         <!-- Image -->
-                        <div class="relative bg-[#0a0f1a] rounded-lg md:rounded-xl overflow-hidden aspect-[4/5] mb-3">
+                        <div class="relative bg-gray-50 rounded-lg md:rounded-xl overflow-hidden aspect-[4/5] mb-3">
                             @if($product->stock < 5)
                                 <span class="absolute top-2 left-2 bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider z-10 shadow-lg">Low Stock</span>
                             @elseif($product->created_at->diffInDays(now()) < 30)
-                                <span class="absolute top-2 left-2 bg-gradient-to-r from-[#1E3A8A] to-[#60A5FA] text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider z-10 shadow-lg">New</span>
+                                <span class="absolute top-2 left-2 bg-gradient-to-r from-blue-600 to-blue-400 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider z-10 shadow-lg">New</span>
                             @endif
                             
                             @if($product->images && $product->images->count() > 0)
                                 <img src="{{ Str::startsWith($product->images->first()->image, 'http') ? $product->images->first()->image : asset('storage/' . $product->images->first()->image) }}" 
                                      alt="{{ $product->name }}"
                                      loading="lazy"
-                                     onerror="this.src='https://placehold.co/400x500/0f172a/60A5FA?text={{ urlencode($product->name) }}'"
-                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                     onerror="this.src='https://placehold.co/400x500/f8fafc/3b82f6?text={{ urlencode($product->name) }}'"
+                                     class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105">
                             @else
-                                <div class="w-full h-full flex items-center justify-center bg-[#0a0f1a]">
-                                    <svg class="w-10 h-10 text-[#60A5FA]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                <div class="w-full h-full flex items-center justify-center bg-gray-50">
+                                    <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                 </div>
                             @endif
                         </div>
                         
                         <!-- Info -->
                         <div class="px-1">
-                            <p class="text-[9px] font-bold text-[#60A5FA] uppercase tracking-widest mb-1 truncate">{{ $product->category->name }}</p>
-                            <h3 class="font-heading font-bold text-sm text-white leading-tight mb-2 line-clamp-2 h-9 group-hover:text-[#93C5FD] transition-colors">{{ $product->name }}</h3>
+                            <p class="text-[9px] font-bold text-blue-600 uppercase tracking-widest mb-1 truncate">{{ $product->category->name }}</p>
+                            <h3 class="font-heading font-bold text-sm text-gray-900 leading-tight mb-2 line-clamp-2 h-9 group-hover:text-blue-600 transition-colors">{{ $product->name }}</h3>
                             <div class="flex items-center justify-between mt-auto">
-                                <span class="font-bold text-sm md:text-base text-[#93C5FD]">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                                <span class="font-bold text-sm md:text-base text-blue-700">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
                             </div>
                         </div>
                     </a>

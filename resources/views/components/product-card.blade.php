@@ -1,6 +1,6 @@
 @props(['product'])
 
-<div class="group relative">
+<div class="group relative flex flex-col h-full">
     <a href="{{ route('product.show', $product->id) }}" class="block overflow-hidden rounded-lg bg-gray-100 mb-3 relative aspect-[4/5]">
         @if($product->images && $product->images->count() > 0)
             <img src="{{ Str::startsWith($product->images->first()->image, 'http') ? $product->images->first()->image : asset('storage/' . $product->images->first()->image) }}" 

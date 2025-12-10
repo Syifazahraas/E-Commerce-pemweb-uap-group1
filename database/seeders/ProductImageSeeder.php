@@ -12,38 +12,49 @@ class ProductImageSeeder extends Seeder
     {
         // Gambar sepatu menggunakan placeholder yang reliable
         $productImages = [
-            'air-max-classic-white' => [
-                'https://placehold.co/600x750/ffffff/000000?text=Air+Max+White',
+            // New Balance 530 - retro/vintage sneaker style
+            'new-balance-530-unisex-sneakers' => [
+                'https://images.unsplash.com/photo-1539185441755-769473a23570?w=800&h=1000&fit=crop&q=80',
             ],
-            'urban-black-sneakers' => [
-                'https://placehold.co/600x750/1a1a1a/ffffff?text=Urban+Black',
+            // Crocs Classic Clog - beige/bone colored clogs
+            'classic-clog-kids-bone' => [
+                'https://images.unsplash.com/photo-1603487742131-4160ec999306?w=800&h=1000&fit=crop&q=80',
             ],
-            'retro-blue-runners' => [
-                'https://placehold.co/600x750/60A5FA/ffffff?text=Retro+Blue',
+            // Adidas Handball Spezial - blue retro sneakers
+            'handball-spezial-mens-sneakers' => [
+                'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&h=1000&fit=crop&q=80',
             ],
-            'pro-runner-3000' => [
-                'https://placehold.co/600x750/93C5FD/1E3A8A?text=Pro+Runner',
+            // Nike Cortez - classic white/red Nike sneakers
+            'cortez-mens-sneakers' => [
+                'https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=800&h=1000&fit=crop&q=80',
             ],
+            // Speed Boost Elite - performance running shoes
             'speed-boost-elite' => [
-                'https://placehold.co/600x750/1E3A8A/93C5FD?text=Speed+Boost',
+                'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&h=1000&fit=crop&q=80',
             ],
-            'classic-brown-loafers' => [
-                'https://placehold.co/600x750/8B4513/ffffff?text=Brown+Loafers',
+            // Air Jordan 1 Low - red/black Jordan sneakers
+            'air-jordan-1-retro-low-og' => [
+                'https://images.unsplash.com/photo-1607522370275-f14206abe5d3?w=800&h=1000&fit=crop&q=80',
             ],
-            'navy-suede-loafers' => [
-                'https://placehold.co/600x750/000080/ffffff?text=Navy+Loafers',
+            // Nike Sunray - kids pink/white sport sandals
+            'sunray-protect-4-boys-sandals' => [
+                'https://images.unsplash.com/photo-1603808033192-082d6919d3e1?w=800&h=1000&fit=crop&q=80',
             ],
-            'mountain-hiker-boots' => [
-                'https://placehold.co/600x750/556B2F/ffffff?text=Hiker+Boots',
+            // On Cloud 6 - modern running sneakers with cloud technology
+            'cloud-6-mens-sneakers' => [
+                'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=800&h=1000&fit=crop&q=80',
             ],
-            'chelsea-ankle-boots' => [
-                'https://placehold.co/600x750/654321/ffffff?text=Chelsea+Boots',
+            // Adidas Adizero - pink/purple women's racing shoes
+            'adizero-evo-sl-womens-running-shoes' => [
+                'https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?w=800&h=1000&fit=crop&q=80',
             ],
-            'beach-sandals' => [
-                'https://placehold.co/600x750/FFD700/000000?text=Beach+Sandals',
+            // Vans Skate Loafer - dark green/forest Vans style sneakers
+            'skate-loafer-mens-sneakers' => [
+                'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=800&h=1000&fit=crop&q=80',
             ],
-            'sport-slide-sandals' => [
-                'https://placehold.co/600x750/00CED1/000000?text=Sport+Slides',
+            // Floody Blue Boots - blue/brown leather boots
+            'floody-blue-leather-boots' => [
+                'https://images.unsplash.com/photo-1638247025967-b4e38f787b76?w=800&h=1000&fit=crop&q=80',
             ],
         ];
 
@@ -51,17 +62,14 @@ class ProductImageSeeder extends Seeder
             $product = Product::where('slug', $slug)->first();
             
             if ($product) {
+                // Clear existing images to avoid duplicate/stale placeholders
+                $product->images()->delete();
+                
                 foreach ($images as $imageUrl) {
-                    ProductImage::updateOrCreate(
-                        [
-                            'product_id' => $product->id,
-                            'image' => $imageUrl
-                        ],
-                        [
-                            'product_id' => $product->id,
-                            'image' => $imageUrl
-                        ]
-                    );
+                    ProductImage::create([
+                        'product_id' => $product->id,
+                        'image' => $imageUrl
+                    ]);
                 }
             }
         }

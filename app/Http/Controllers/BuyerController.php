@@ -29,10 +29,10 @@ class BuyerController extends Controller
         }
 
         // Filter by price range
-        if ($request->has('min_price') && $request->min_price) {
+        if ($request->has('min_price') && $request->min_price !== null) {
             $query->where('price', '>=', $request->min_price);
         }
-        if ($request->has('max_price') && $request->max_price) {
+        if ($request->has('max_price') && $request->max_price !== null) {
             $query->where('price', '<=', $request->max_price);
         }
 
