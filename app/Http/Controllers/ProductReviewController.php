@@ -19,35 +19,42 @@ class ProductReviewController extends Controller
         ]);
 
         $user = Auth::user();
-        if (!$user->buyer) {
-            return back()->with('error', 'You must complete your profile before reviewing.');
+        // Allow review even if no buyer profile, since we generally allow it now
+        // if (!$user->buyer) { ... }
+
+        // Try to find a verified transaction to link (Optional but good for Verified badge)
+        $transaction = null;
+        if ($user->buyer) {
+            $transaction = Transaction::where('buyer_id', $user->buyer->id)
+                ->whereHas('details', function ($query) use ($request) {
+                    $query->where('product_id', $request->product_id);
+                })
+                ->first();
         }
 
-        // Find a valid transaction for this product by this user
-        // We look for a TransactionDetail for this product where the parent Transaction belongs to the user
-        $transaction = Transaction::where('buyer_id', $user->buyer->id)
-            ->whereHas('details', function ($query) use ($request) {
-                $query->where('product_id', $request->product_id);
-            })
-            // Optional: Check status if you want to restrict to 'completed'
-            // ->where('status', 'completed') 
-            ->first();
-
-        if (!$transaction) {
-            return back()->with('error', 'You can only review products you have purchased.');
+        // Check availability strictly only if we want to enforce it. 
+        // For now, we ALLOW general reviews, but we check duplicates based on User + Product
+        
+        // Check if review already exists for this USER and product
+        // (Previously checked transaction_id, now checking user_id or transaction_id)
+        $query = ProductReview::where('product_id', $request->product_id);
+        
+        if ($transaction) {
+            $query->where(function($q) use ($transaction, $user) {
+                $q->where('transaction_id', $transaction->id)
+                  ->orWhere('user_id', $user->id);
+            });
+        } else {
+            $query->where('user_id', $user->id);
         }
 
-        // Check if review already exists for this transaction and product
-        $existingReview = ProductReview::where('transaction_id', $transaction->id)
-            ->where('product_id', $request->product_id)
-            ->exists();
-
-        if ($existingReview) {
-            return back()->with('error', 'You have already reviewed this product for this purchase.');
+        if ($query->exists()) {
+            return back()->with('error', 'You have already reviewed this product.');
         }
 
         ProductReview::create([
-            'transaction_id' => $transaction->id, // Use the transaction ID we found
+            'user_id' => $user->id,
+            'transaction_id' => $transaction ? $transaction->id : null, 
             'product_id' => $request->product_id,
             'rating' => $request->rating,
             'review' => $request->review,
