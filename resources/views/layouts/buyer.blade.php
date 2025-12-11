@@ -15,6 +15,15 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         h1, h2, h3, h4, h5, h6, .font-heading { font-family: 'Outfit', sans-serif; }
+        
+        /* Floating animation for shoes */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(-5deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
     </style>
 </head>
 <body class="bg-white text-slate-900 flex flex-col min-h-screen" x-data="{ 

@@ -6,10 +6,9 @@
 
 <!-- Hero Section - Dark Theme - Compact when search active -->
 <section class="relative {{ request('search') || request('category') ? 'min-h-[60vh]' : 'min-h-screen' }} bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] flex items-center justify-center overflow-hidden">
-    <!-- Animated Background Glow -->
-    <div class="absolute inset-0 opacity-30">
-        <div class="absolute top-20 left-1/4 w-96 h-96 bg-[#60A5FA] rounded-full filter blur-[120px] animate-pulse"></div>
-        <div class="absolute bottom-20 right-1/4 w-96 h-96 bg-[#93C5FD] rounded-full filter blur-[120px] animate-pulse delay-1000"></div>
+    <!-- Subtle Background Glow -->
+    <div class="absolute inset-0 opacity-20">
+        <div class="absolute top-20 right-1/4 w-96 h-96 bg-[#60A5FA] rounded-full filter blur-[120px] animate-pulse"></div>
     </div>
     
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 z-10 py-12 md:py-24">
@@ -33,19 +32,19 @@
                 </div>
             </div>
 
-            <!-- Hero Visual Element - Abstract Gradient -->
-            <div class="relative h-[400px] md:h-[500px] w-full animate-fade-in delay-200 order-1 md:order-2">
-                <!-- Decorative Glow Layers -->
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-500/10 blur-[80px] rounded-full pointer-events-none"></div>
-                <div class="absolute top-1/3 left-1/3 w-[300px] h-[300px] bg-gradient-to-br from-blue-400/30 to-blue-600/20 rounded-full blur-3xl animate-pulse"></div>
-                <div class="absolute bottom-1/3 right-1/3 w-[250px] h-[250px] bg-gradient-to-tl from-cyan-400/20 to-blue-500/30 rounded-full blur-3xl animate-pulse delay-1000"></div>
+            <!-- Hero Visual Element - Clean Professional Design -->
+            <div class="relative h-[400px] md:h-[500px] w-full animate-fade-in delay-200 order-1 md:order-2 flex items-center justify-center">
                 
-                <!-- Decorative Icons/Shapes -->
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                    <svg class="w-64 md:w-80 h-64 md:h-80 text-blue-400/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="0.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
-                    </svg>
+                {{-- Single Premium Hero Image --}}
+                <div class="relative w-full max-w-md md:max-w-lg z-10 animate-float-slow">
+                    {{-- Main Hero Shoe (Blue Nike - Verified) --}}
+                    <img src="https://pngimg.com/uploads/running_shoes/running_shoes_PNG5824.png" 
+                         alt="Premium Blue Nike Running Shoe" 
+                         class="w-full h-auto object-contain drop-shadow-[0_20px_50px_rgba(59,130,246,0.5)] transform -rotate-[15deg] hover:scale-110 hover:-rotate-12 transition-all duration-700 ease-out">
                 </div>
+                
+                {{-- Decorative Background Glow --}}
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px] -z-10 animate-pulse"></div>
             </div>
         </div>
 
@@ -164,8 +163,8 @@
             <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-50 rounded-full blur-3xl opacity-30"></div>
             
             <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                <!-- Left Content -->
-                <div class="text-center md:text-left order-2 md:order-1">
+                <!-- Right Content (Text) -->
+                <div class="text-center md:text-left order-2 md:order-2">
                     <!-- Promo Badge -->
                     <div class="inline-flex items-center gap-2 bg-blue-100 px-4 py-2 rounded-full mb-4 border-2 border-blue-300">
                         <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
@@ -196,8 +195,8 @@
                     <p class="text-xs text-gray-600 text-center md:text-left mt-3 font-semibold">Free shipping on orders over Rp 1.000.000</p>
                 </div>
                 
-                <!-- Right Product Image -->
-                <div class="order-1 md:order-2 flex items-center justify-center">
+                <!-- Left Product Image -->
+                <div class="order-1 md:order-1 flex items-center justify-center">
                     <div class="relative">
                         <!-- Product Image -->
                         <div class="relative transform hover:scale-105 transition-transform duration-500">
