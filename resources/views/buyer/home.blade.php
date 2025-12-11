@@ -226,7 +226,7 @@
         <!-- Horizontal Scroll Container -->
         <div class="relative">
             <div class="flex gap-4 md:gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
-                @foreach(App\Models\Product::with('images', 'category')->inRandomOrder()->take(8)->get() as $product)
+                @foreach(App\Models\Product::with('images', 'category')->has('transactionDetails', '>=', 5)->inRandomOrder()->take(1)->get() as $product)
                 <div class="flex-none w-64 md:w-72 snap-start group">
                     <a href="{{ route('product.show', $product->id) }}" class="flex flex-col h-full bg-white rounded-2xl md:rounded-3xl p-4 border border-gray-100 hover:border-blue-400 transition-all duration-300 hover:shadow-xl hover:shadow-blue-200/50">
                         <!-- Image -->
@@ -334,124 +334,9 @@
 @endif
     {{-- Normal order when NO search/filter: Best Sellers FIRST, then All Products --}}
 
-<!-- Best Seller Products - Dark Theme -->
-<section id="bestseller" class="py-16 md:py-20 bg-[#0f172a]">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-end justify-between mb-8 md:mb-10">
-            <div>
-                <h2 class="font-heading font-black text-3xl md:text-4xl uppercase tracking-tighter text-white">Best Sellers</h2>
-                <p class="text-[#93C5FD] mt-2">Top picks from our collection</p>
-            </div>
-            <div class="hidden md:block w-32 h-1 bg-[#60A5FA] rounded-full"></div>
-        </div>
 
-        <!-- Horizontal Scroll Container -->
-        <div class="relative">
-            <div class="flex gap-4 md:gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
-                @foreach(App\Models\Product::with('images', 'category')->inRandomOrder()->take(8)->get() as $product)
-                <div class="flex-none w-64 md:w-72 snap-start group">
-                    <a href="{{ route('product.show', $product->id) }}" class="flex flex-col h-full bg-white rounded-2xl md:rounded-3xl p-4 border border-gray-100 hover:border-blue-400 transition-all duration-300 hover:shadow-xl hover:shadow-blue-200/50">
-                        <!-- Image -->
-                        <div class="relative bg-gray-50 rounded-xl md:rounded-2xl overflow-hidden aspect-[4/5] mb-4 flex-shrink-0">
-                            <span class="absolute top-3 left-3 bg-gradient-to-r from-blue-600 to-blue-400 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider z-10 shadow-lg">Best Seller</span>
-                            
-                            @if($product->images && $product->images->count() > 0)
-                                <img src="{{ Str::startsWith($product->images->first()->image, 'http') ? $product->images->first()->image : asset('storage/' . $product->images->first()->image) }}" 
-                                     alt="{{ $product->name }}"
-                                     onerror="this.src='https://placehold.co/400x500/f8fafc/3b82f6?text={{ urlencode($product->name) }}'"
-                                     class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105">
-                            @else
-                                <div class="w-full h-full flex items-center justify-center bg-gray-50">
-                                    <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                </div>
-                            @endif
-                        </div>
-                        
-                        <!-- Info -->
-                        <div class="px-2 flex-grow flex flex-col">
-                            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-2 flex-shrink-0">{{ $product->category->name }}</p>
-                            <h3 class="font-heading font-bold text-lg md:text-xl text-gray-900 leading-tight mb-3 line-clamp-2 min-h-[3.5rem] flex-shrink-0">{{ $product->name }}</h3>
-                            <div class="flex items-center justify-between mt-auto">
-                                <span class="font-bold text-lg text-blue-700">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                @endforeach
-            </div>
-        </div>
-    </div>
-</section>
 
-<!-- All Products - Dark Theme -->
-<section id="collection" class="py-16 md:py-20 bg-gradient-to-br from-[#1e293b] via-[#0f172a] to-[#1e293b]">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-end justify-between mb-8 md:mb-10">
-            <div>
-                <h2 class="font-heading font-black text-3xl md:text-4xl uppercase tracking-tighter text-white">All Products</h2>
-                <p class="text-[#93C5FD] mt-2">Discover our complete collection</p>
-            </div>
-            <a href="{{ route('products.index') }}" class="group flex items-center gap-2 text-[#60A5FA] font-bold uppercase tracking-wider text-sm hover:text-white transition-colors">
-                View All
-                <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                </svg>
-            </a>
-        </div>
 
-        @if($products->count() > 0)
-            <!-- Horizontal Scroll Container -->
-            <div class="flex gap-4 md:gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide mb-8">
-                @foreach($products as $product)
-                <div class="flex-none w-64 md:w-72 snap-start group">
-                    <div class="flex flex-col h-full bg-white rounded-2xl md:rounded-3xl p-4 border border-gray-100 hover:border-blue-400 transition-all duration-300 hover:shadow-xl hover:shadow-blue-200/50">
-                        <div class="relative bg-gray-50 rounded-xl md:rounded-2xl overflow-hidden aspect-[4/5] mb-4 flex-shrink-0">
-                            @if($product->stock < 5)
-                                <span class="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider z-10 shadow-lg">Low Stock</span>
-                            @else
-                                <span class="absolute top-3 left-3 bg-gradient-to-r from-blue-600 to-blue-400 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider z-10 shadow-lg">New</span>
-                            @endif
-                            
-                            @if($product->images && $product->images->count() > 0)
-                                <img src="{{ Str::startsWith($product->images->first()->image, 'http') ? $product->images->first()->image : asset('storage/' . $product->images->first()->image) }}" 
-                                     alt="{{ $product->name }}"
-                                     onerror="this.src='https://placehold.co/400x500/f8fafc/3b82f6?text={{ urlencode($product->name) }}'"
-                                     class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105">
-                            @else
-                                <div class="w-full h-full flex items-center justify-center bg-gray-50">
-                                    <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                </div>
-                            @endif
-                        </div>
-                        
-                        <div class="px-2 flex-grow flex flex-col">
-                            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-2 flex-shrink-0">{{ $product->category->name }}</p>
-                            <h3 class="font-heading font-bold text-lg md:text-xl text-gray-900 leading-tight mb-3 line-clamp-2 min-h-[3.5rem] flex-shrink-0">{{ $product->name }}</h3>
-                            <div class="flex items-center justify-between mt-auto">
-                                <span class="font-bold text-lg text-blue-700">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                                <a href="{{ route('product.show', $product->id) }}" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold uppercase rounded-lg transition-colors shadow-lg">
-                                    View
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-
-            <div class="mt-8">
-                {{ $products->links() }}
-            </div>
-        @else
-            <div class="text-center py-20 bg-[#1a2332] rounded-3xl border-2 border-[#334155]">
-                <p class="text-slate-400 text-lg mb-6">No products found</p>
-                <a href="{{ route('home') }}" class="inline-block px-8 py-3 bg-gradient-to-r from-[#60A5FA] to-[#93C5FD] hover:from-[#93C5FD] hover:to-[#60A5FA] text-white font-bold uppercase tracking-wider text-sm rounded-full transition-all shadow-lg">
-                    View All
-                </a>
-            </div>
-        @endif
-    </div>
-</section>
 
 
 
