@@ -196,98 +196,140 @@ class BuyerController extends Controller
     }
 
     public function processCheckout(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string',
-            'phone' => 'required|string',
-            'address' => 'required|string',
-            'city' => 'required|string',
-            'postal_code' => 'required|string',
-            'shipping_type' => 'required|in:Regular,Express,Same Day',
-            'payment_method' => 'required|in:COD,Transfer',
+{
+    $request->validate([
+        'name' => 'required|string',
+        'phone' => 'required|string',
+        'address' => 'required|string',
+        'city' => 'required|string',
+        'postal_code' => 'required|string',
+        'shipping_type' => 'required|in:Regular,Express,Same Day',
+        'payment_method' => 'required|in:COD,Transfer',
+    ]);
+
+    $cart = session()->get('cart', []);
+
+    if (empty($cart)) {
+        return redirect()->route('cart')->with('error', 'Your cart is empty');
+    }
+
+    try {
+        // Ensure user has buyer record - create if not exists
+        $buyer = Auth::user()->buyer;
+        if (!$buyer) {
+            $buyer = \App\Models\Buyer::create([
+                'user_id' => Auth::user()->id,
+            ]);
+        }
+
+        DB::beginTransaction();
+
+        // Calculate totals
+        $subtotal = collect($cart)->sum('subtotal');
+        $shippingCost = 0;
+
+        switch($request->shipping_type) {
+            case 'Express': $shippingCost = 30000; break;
+            case 'Same Day': $shippingCost = 50000; break;
+            default: $shippingCost = 15000; // Regular
+        }
+
+        $grandTotal = $subtotal + $shippingCost;
+
+        // ✅ FIX: Get store_id from first product in cart
+        $firstProductId = collect($cart)->first()['id'];
+        $firstProduct = Product::findOrFail($firstProductId);
+        $storeId = $firstProduct->store_id;
+
+        // Validate all products are from same store
+        foreach ($cart as $item) {
+            $product = Product::findOrFail($item['id']);
+            if ($product->store_id != $storeId) {
+                throw new \Exception('All products must be from the same store');
+            }
+        }
+
+        // Create transaction
+        $transaction = Transaction::create([
+            'code' => 'TRX-' . time(),
+            'buyer_id' => $buyer->id,
+            'store_id' => $storeId, // ✅ Use actual store_id
+            'address' => $request->address,
+            'city' => $request->city,
+            'postal_code' => $request->postal_code,
+            'shipping_type' => $request->shipping_type,
+            'shipping_cost' => $shippingCost,
+            'grand_total' => $grandTotal,
+            'status' => 'pending',
+            'payment_method' => $request->payment_method,
         ]);
 
-        $cart = session()->get('cart', []);
-
-        if (empty($cart)) {
-            return redirect()->route('cart')->with('error', 'Your cart is empty');
-        }
-
-        try {
-            // Ensure user has buyer record - create if not exists
-            $buyer = Auth::user()->buyer;
-            if (!$buyer) {
-                $buyer = \App\Models\Buyer::create([
-                    'user_id' => Auth::user()->id,
-                ]);
-            }
-
-            DB::beginTransaction();
-
-            // Calculate totals
-            $subtotal = collect($cart)->sum('subtotal');
-            $shippingCost = 0;
-
-            switch($request->shipping_type) {
-                case 'Express': $shippingCost = 30000; break;
-                case 'Same Day': $shippingCost = 50000; break;
-                default: $shippingCost = 15000; // Regular
-            }
-
-            $grandTotal = $subtotal + $shippingCost;
-
-            // Create transaction
-            $transaction = Transaction::create([
-                'code' => 'TRX-' . time(),
-                'buyer_id' => $buyer->id,
-                'store_id' => 1, // Default store
-                'address' => $request->address,
-                'city' => $request->city,
-                'postal_code' => $request->postal_code,
-                'shipping_type' => $request->shipping_type,
-                'shipping_cost' => $shippingCost,
-                'grand_total' => $grandTotal,
-                'status' => 'pending',
-                'payment_method' => $request->payment_method,
+        // Create transaction details
+        foreach ($cart as $item) {
+            $transaction->details()->create([
+                'product_id' => $item['id'],
+                'qty' => $item['qty'],
+                'size' => $item['size'],
+                'subtotal' => $item['subtotal'],
             ]);
 
-            // Create transaction details
-            foreach ($cart as $item) {
-                $transaction->details()->create([
-                    'product_id' => $item['id'],
-                    'qty' => $item['qty'],
-                    'size' => $item['size'], // Save size
-                    'subtotal' => $item['subtotal'],
-                ]);
-
-                // Update stock
-                Product::where('id', $item['id'])->decrement('stock', $item['qty']);
-            }
-
-            DB::commit();
-
-            // Clear cart
-            session()->forget('cart');
-
-            // Different flow based on payment method
-            if ($request->payment_method === 'COD') {
-                // COD: Mark as paid immediately and go to order history
-                $transaction->status = 'paid';
-                $transaction->save();
-                
-                return redirect()->route('transaction.history')
-                    ->with('success', 'Order placed successfully! Order ID: ' . $transaction->code);
-            } else {
-                // Bank Transfer: Show payment page for confirmation
-                return redirect()->route('payment.show', $transaction->id)
-                    ->with('success', 'Order placed successfully! Please complete your payment.');
-            }
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Failed to process order: ' . $e->getMessage());
+            // Update stock
+            Product::where('id', $item['id'])->decrement('stock', $item['qty']);
         }
+
+        DB::commit();
+
+        // Clear cart
+        session()->forget('cart');
+
+        // Different flow based on payment method
+        if ($request->payment_method === 'COD') {
+            // COD: Mark as paid immediately and record balance
+            $transaction->status = 'paid';
+            $transaction->save();
+
+            // ✅ Record income to store balance
+            $this->recordStoreIncome($transaction);
+
+            return redirect()->route('transaction.history')
+                ->with('success', 'Order placed successfully! Order ID: ' . $transaction->code);
+        } else {
+            // Bank Transfer: Show payment page for confirmation
+            return redirect()->route('payment.show', $transaction->id)
+                ->with('success', 'Order placed successfully! Please complete your payment.');
+        }
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', 'Failed to process order: ' . $e->getMessage());
     }
+}
+
+/**
+ * ✅ NEW METHOD: Record income to store balance when transaction is paid
+ */
+private function recordStoreIncome(Transaction $transaction)
+{
+    // Get or create store balance
+    $storeBalance = \App\Models\StoreBalance::firstOrCreate(
+        ['store_id' => $transaction->store_id],
+        ['balance' => 0]
+    );
+
+    // Add income to balance
+    $storeBalance->balance += $transaction->grand_total;
+    $storeBalance->save();
+
+    // Record in balance history
+    \App\Models\StoreBalanceHistory::create([
+        'store_balance_id' => $storeBalance->id,
+        'type' => 'income',
+        'amount' => $transaction->grand_total,
+        'reference_type' => 'Transaction',
+        'reference_id' => $transaction->code,
+        'remarks' => 'Pembayaran dari pesanan ' . $transaction->code,
+    ]);
+}
 
     public function showPayment($id)
     {
@@ -304,22 +346,25 @@ class BuyerController extends Controller
     }
 
     public function confirmPayment($id)
-    {
-        // Check if user has buyer record
-        if (!Auth::user()->buyer) {
-            return redirect()->route('home')->with('error', 'Transaction not found.');
-        }
-
-        $transaction = Transaction::where('buyer_id', Auth::user()->buyer->id)
-            ->findOrFail($id);
-
-        // Update status to paid
-        $transaction->status = 'paid';
-        $transaction->save();
-
-        return redirect()->route('transaction.history')
-            ->with('success', 'Payment confirmed! Your order is being processed.');
+{
+    // Check if user has buyer record
+    if (!Auth::user()->buyer) {
+        return redirect()->route('home')->with('error', 'Transaction not found.');
     }
+
+    $transaction = Transaction::where('buyer_id', Auth::user()->buyer->id)
+        ->findOrFail($id);
+
+    // Update status to paid
+    $transaction->status = 'paid';
+    $transaction->save();
+
+    // ✅ Record income to store balance
+    $this->recordStoreIncome($transaction);
+
+    return redirect()->route('transaction.history')
+        ->with('success', 'Payment confirmed! Your order is being processed.');
+}
 
     public function transactionHistory()
     {
