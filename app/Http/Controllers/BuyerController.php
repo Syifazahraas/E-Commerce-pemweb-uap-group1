@@ -71,26 +71,27 @@ class BuyerController extends Controller
 
     public function productDetail($id)
     {
-        $product = Product::with(['category', 'images', 'reviews.transaction.buyer.user'])->findOrFail($id);
+        $product = Product::with(['category', 'images', 'reviews.user', 'reviews.transaction.buyer.user'])->findOrFail($id);
 
         $canReview = false;
-        if (Auth::check() && Auth::user()->buyer) {
-            // Check if user bought product and hasn't reviewed it
-            $hasPurchased = Transaction::where('buyer_id', Auth::user()->buyer->id)
-                ->whereHas('details', function ($q) use ($id) {
-                    $q->where('product_id', $id);
+        if (Auth::check()) {
+            $userId = Auth::id();
+            $buyerId = Auth::user()->buyer ? Auth::user()->buyer->id : 0;
+
+            // Check if user has already reviewed this product
+            // We check matching user_id OR matching transaction->buyer_id (if they have one)
+            $alreadyReviewed = \App\Models\ProductReview::where('product_id', $id)
+                ->where(function($q) use ($userId, $buyerId) {
+                    $q->where('user_id', $userId);
+                    
+                    if ($buyerId) {
+                        $q->orWhereHas('transaction', function($t) use ($buyerId) {
+                            $t->where('buyer_id', $buyerId);
+                        });
+                    }
                 })->exists();
 
-            if ($hasPurchased) {
-                // Check if already reviewed (naive check based on ANY transaction of this user)
-                // A better approach would be to check if there is AT LEAST ONE unreviewed transaction
-                $existingReview = ProductReview::where('product_id', $id)
-                    ->whereHas('transaction', function($q) {
-                        $q->where('buyer_id', Auth::user()->buyer->id);
-                    })->exists();
-
-                $canReview = !$existingReview;
-            }
+            $canReview = !$alreadyReviewed;
         }
 
         return view('buyer.product-detail', compact('product', 'canReview'));
